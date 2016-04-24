@@ -76,7 +76,6 @@ public class Parser {
 		}
 
 		Date date = dateFormat.parse(text_date, new ParsePosition(0));
-
 		return new Article(title, body, topics, date);
 	}
 

@@ -16,46 +16,33 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Parser {
+	private static final SimpleDateFormat dateFormat =
+			new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss.SS", Locale.US);
 
-	private static final String END_1 = " Reuter\n&#3;";
-	private static final String END_2 = " REUTER\n&#3;";
+	private static final String reuterSuffix1 = " Reuter\n&#3;";
+	private static final String reuterSuffix2 = " REUTER\n&#3;";
 
 	private static final String dataPrefix = "reut2-";
 	private static final String startArticle = "<REUTERS";
 	private static final String endArticle = "</REUTERS";
 
-	public static void main(String[] args) throws IOException {
-		System.out.println("Reading articles");
-		long start = System.currentTimeMillis();
+	private File data;
 
-		File data = new File("data");
-		List<Article> articles = parseFile(data);
-
-		System.out.println("Finished reading " + articles.size() + " articles in "
-				+ (System.currentTimeMillis() - start) + "ms");
-
-		System.out.println(articles.get(0).title);
-		System.out.println(articles.get(0).date);
-		System.out.println(articles.get(0).topics);
-		System.out.println(articles.get(0).body);
+	public Parser(File data){
+		this.data = data;
 	}
 
-	public static BufferedReader toBufferedReader(File f){
-		try { return new BufferedReader(new FileReader(f)); }
-		catch (FileNotFoundException e) { throw new RuntimeException(e); }
-	}
-
-	public static List<Article> parseFile(File data)
+	public List<Article> parse()
 	{
-		return 	Arrays.stream(data.listFiles())
-				.filter(f -> f.getName().startsWith(dataPrefix))
-				.map(Parser::toBufferedReader)
-				.flatMap(Parser::splitFile)
-				.map(Parser::parseArticle)
-				.collect(Collectors.toList());
+		return Arrays.stream(data.listFiles())
+			.filter(f -> f.getName().startsWith(dataPrefix))
+			.map(Parser::toBufferedReader)
+			.flatMap(this::splitFile)
+			.map(this::parseArticle)
+			.collect(Collectors.toList());
 	}
 
-	private static Stream<String> splitFile(BufferedReader br) {
+	private Stream<String> splitFile(BufferedReader br) {
 		try {
 			List<String> articleStrings = new ArrayList<String>();
 			String ln;
@@ -76,36 +63,28 @@ public class Parser {
 		catch (IOException e) { throw new RuntimeException(e); }
 	}
 
-	private static Article parseArticle(String s) {
+	private Article parseArticle(String s) {
 		String topics = 	parseTag("TOPICS",s );
 		String title = 		parseTag("TITLE", s);
 		String body = 		parseTag("BODY", s);
 		String text_date = 	parseTag("DATE", s);
 
-		if (body.endsWith(END_1))
+		if (body.endsWith(reuterSuffix1) || body.endsWith(reuterSuffix2))
 		{
-			int last = body.length() - END_1.length();
-			body = body.substring(0, last);
-		}
-		else if (body.endsWith(END_2))
-		{
-			int last = body.length() - END_2.length();
+			int last = body.length() - reuterSuffix1.length();
 			body = body.substring(0, last);
 		}
 
-		topics = topics.replaceAll("\\<D\\>", " ").replaceAll("\\<\\/D\\>","");
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss.SS", Locale.US);
 		Date date = dateFormat.parse(text_date, new ParsePosition(0));
 
 		return new Article(title, body, topics, date);
 	}
 
-	private static String parseTag(String tag, String text){
+	private String parseTag(String tag, String text){
 		return parseTag(tag, text, true);
 	}
 
-	private static String parseTag(String tag, String text, boolean allowEmpty) {
+	private String parseTag(String tag, String text, boolean allowEmpty) {
 		String startTag = "<" + tag + ">";
 		String endTag = "</" + tag + ">";
 		int startTagIndex = text.indexOf(startTag);
@@ -117,6 +96,11 @@ public class Parser {
 		int end = text.indexOf(endTag, start);
 		if (end < 0) throw new IllegalArgumentException("no end, tag=" + tag + " text=" + text);
 		return text.substring(start, end);
+	}
+
+	public static BufferedReader toBufferedReader(File f){
+		try { return new BufferedReader(new FileReader(f)); }
+		catch (FileNotFoundException e) { throw new RuntimeException(e); }
 	}
 }
 

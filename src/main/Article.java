@@ -2,7 +2,9 @@ package main;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Article {
 
@@ -18,6 +20,17 @@ public class Article {
 		this.body = body;
 		this.topics = topics;
 		this.date = date;
+	}
+
+	public Map<String, Integer> df(){
+		Map<String, Integer> counts = new HashMap<String, Integer>();
+		for (String word : bodyWords()){
+			if (counts.containsKey(word)){
+				counts.put(word, counts.get(word) + 1);
+			}
+			else counts.put(word, 1);
+		}
+		return counts;
 	}
 
 	public List<String> bodyWords(){

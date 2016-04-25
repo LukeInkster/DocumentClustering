@@ -9,8 +9,10 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,7 +45,7 @@ public class Parser {
 
 	private Stream<String> splitFile(BufferedReader br) {
 		Stream.Builder<String> articleStrings = Stream.builder();
-		for (String ln = lineFrom(br); (ln = lineFrom(br)) != null;)
+		for (String ln; (ln = lineFrom(br)) != null;)
 		{
 			if (!ln.startsWith(startArticle)) continue;
 
@@ -58,33 +60,42 @@ public class Parser {
 	}
 
 	private Article parseArticle(String s) {
-		String topics = 	parseTag("TOPICS",s );
-		String title = 		parseTag("TITLE", s);
-		String body = 		parseTag("BODY", s);
-		String text_date = 	parseTag("DATE", s);
+		String titleTag = parseTag("TITLE", s);
+		String bodyTag = parseTag("BODY", s);
+		String dateTag = parseTag("DATE", s);
+		Set<String> topics = parseListTag("TOPICS", s);
+		Set<String> places = parseListTag("PLACES", s);
+		Set<String> people = parseListTag("PEOPLE", s);
+		Set<String> orgs = parseListTag("ORGS", s);
+		Set<String> exchanges = parseListTag("EXCHANGES", s);
 
-		if (body.endsWith(reuterSuffix1) || body.endsWith(reuterSuffix2))
+		if (bodyTag.endsWith(reuterSuffix1) || bodyTag.endsWith(reuterSuffix2))
 		{
-			int last = body.length() - reuterSuffix1.length();
-			body = body.substring(0, last);
+			int last = bodyTag.length() - reuterSuffix1.length();
+			bodyTag = bodyTag.substring(0, last);
 		}
 
-		Date date = dateFormat.parse(text_date, new ParsePosition(0));
-		return new Article(title, body, topics, date);
+		Date date = dateFormat.parse(dateTag, new ParsePosition(0));
+		return new Article(titleTag, bodyTag, date, topics, places, people, orgs, exchanges);
 	}
 
-	private String parseTag(String tag, String text){
-		return parseTag(tag, text, true);
+	private Set<String> parseListTag(String tag, String text) {
+		return new HashSet<String>(
+				Arrays.stream(
+						parseTag(tag, text)
+							.replace("</D>", " ")
+							.replace("<D>", " ")
+							.split("\\s+"))
+					.filter(x -> !x.equals(""))
+					.collect(Collectors.toList())
+				);
 	}
 
-	private String parseTag(String tag, String text, boolean allowEmpty) {
+	private String parseTag(String tag, String text) {
 		String startTag = "<" + tag + ">";
 		String endTag = "</" + tag + ">";
 		int startTagIndex = text.indexOf(startTag);
-		if (startTagIndex < 0) {
-			if (allowEmpty)	return "";
-			throw new IllegalArgumentException("no start, tag=" + tag + " text=" + text);
-		}
+		if (startTagIndex < 0) return "";
 		int start = startTagIndex + startTag.length();
 		int end = text.indexOf(endTag, start);
 		if (end < 0) throw new IllegalArgumentException("no end, tag=" + tag + " text=" + text);

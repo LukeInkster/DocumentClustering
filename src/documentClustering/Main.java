@@ -3,8 +3,10 @@ package documentClustering;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
@@ -30,6 +32,12 @@ public class Main {
 		System.out.println("Finished calculating tfidf values in "
 				+ (System.currentTimeMillis() - start) + "ms");
 
+		HashSet<String> topics = new HashSet<String>();
+//		for (Article a:articles){
+//			topics.addAll(a.topics);
+//			System.out.println(a.topics + " : " + a.topics.size());
+//		}
+//		for (String s:topics) System.out.println(s);
 //		Map.Entry<String, Integer> max = null;
 //		for (Map.Entry<String, Integer> entry : df.entrySet()){
 //			if (max == null || entry.getValue() > max.getValue()){
@@ -40,23 +48,31 @@ public class Main {
 
 		//System.out.println(articles.get(0).body);
 		//articles.get(0).tfidf(df).forEach((k,v) -> {System.out.println(k + ": " + v);});
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(0)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(1)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(2)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(3)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(4)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(5)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(6)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(7)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(8)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(9)));
-		System.out.println(CosineSimilarity.of(articles.get(0), articles.get(10)));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(0).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(1).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(2).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(3).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(4).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(5).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(6).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(7).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(8).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(9).tfidf));
+		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(10).tfidf));
 //		System.out.println(articles.get(0).title);
 //		System.out.println(articles.get(0).date);
 //		System.out.println(articles.get(0).topics);
 //		for (Map.Entry<String, Integer> e : tf.entrySet()){
 //			System.out.println(e.getKey() + ": " + e.getValue());
 //		}
+
+		List<Cluster> clusters = KMeans.cluster(articles.subList(1000, 2000), 3);
+		for (Cluster c : clusters){
+			System.out.println(c.articles.size());
+		}
+		for (Entry<String, Double> e : clusters.get(1).tfidf().entrySet()){
+			System.out.println(e.getKey() + " : " + e.getValue());
+		}
 	}
 
 	private static Map<String, Double> df(List<Article> articles) {

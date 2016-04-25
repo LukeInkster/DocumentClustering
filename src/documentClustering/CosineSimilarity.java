@@ -6,25 +6,19 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 public class CosineSimilarity {
-	public static double of(Article a, Article b){
+	public static double of(Tfidf a, Tfidf b){
 		Set<String> allWords = unionWords(a, b);
 		double[] aVals = new double[allWords.size()];
 		double[] bVals = new double[allWords.size()];
 		int i = 0;
 		for (String w : allWords){
-			aVals[i] = a.tfidf(w);
-			bVals[i] = b.tfidf(w);
+			aVals[i] = a.get(w);
+			bVals[i] = b.get(w);
 			++i;
 		}
 
-//		System.out.println(sumProducts(aVals, bVals));
-//		System.out.println(vecLen(aVals));
-//		System.out.println(vecLen(bVals));
-
-		return //Math.cos(
-				sumProducts(aVals, bVals) /
+		return sumProducts(aVals, bVals) /
 				(vecLen(aVals) * vecLen(bVals));
-			//);
 	}
 
 	private static double sumProducts(double[] aVals, double[] bVals) {
@@ -45,10 +39,10 @@ public class CosineSimilarity {
 				);
 	}
 
-	private static Set<String> unionWords(Article a, Article b) {
+	private static Set<String> unionWords(Tfidf a, Tfidf b) {
 		Set<String> words = new HashSet<String>();
-		words.addAll(a.distinctWords());
-		words.addAll(b.distinctWords());
+		words.addAll(a.words());
+		words.addAll(b.words());
 		return words;
 	}
 }

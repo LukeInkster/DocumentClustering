@@ -60,7 +60,7 @@ public class Main {
 	}
 
 	private static Map<String, Double> df(List<Article> articles) {
-		Double incr = 1.0/articles.size();
+		double incr = 1.0/articles.size();
 		Map<String, Double> df = new HashMap<String, Double>();
 
 		articles

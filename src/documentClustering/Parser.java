@@ -42,23 +42,19 @@ public class Parser {
 	}
 
 	private Stream<String> splitFile(BufferedReader br) {
-		try {
-			Stream.Builder<String> articleStrings = Stream.builder();
-			String ln;
-			while ((ln = br.readLine()) != null)
-			{
-				if (!ln.startsWith(startArticle)) continue;
+		Stream.Builder<String> articleStrings = Stream.builder();
+		for (String ln = lineFrom(br); (ln = lineFrom(br)) != null;)
+		{
+			if (!ln.startsWith(startArticle)) continue;
 
-				StringBuilder sb = new StringBuilder();
-				while (!ln.startsWith(endArticle)) {
-					sb.append(ln).append("\n");
-					ln = br.readLine();
-				}
-				articleStrings.add(sb.toString());
+			StringBuilder sb = new StringBuilder();
+			while (!ln.startsWith(endArticle)) {
+				sb.append(ln).append("\n");
+				ln = lineFrom(br);
 			}
-			return articleStrings.build();
+			articleStrings.add(sb.toString());
 		}
-		catch (IOException e) { throw new RuntimeException(e); }
+		return articleStrings.build();
 	}
 
 	private Article parseArticle(String s) {
@@ -98,6 +94,11 @@ public class Parser {
 	public static BufferedReader toBufferedReader(File f){
 		try { return new BufferedReader(new FileReader(f)); }
 		catch (FileNotFoundException e) { throw new RuntimeException(e); }
+	}
+
+	private String lineFrom(BufferedReader br) {
+		try { return br.readLine();	}
+		catch (IOException e) { throw new RuntimeException(e); }
 	}
 }
 

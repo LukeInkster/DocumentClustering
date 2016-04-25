@@ -39,10 +39,12 @@ public class Article {
 
 	public Map<String, Double> tfidf(Map<String, Double> df){
 		if (tfidf != null) return tfidf;
+
 		tfidf = new HashMap<String, Double>();
 		tf.forEach((k, v) -> {
 			tfidf.put(k, Math.log(((double)v)/df.get(k)));
 		});
+
 		return tfidf;
 	}
 

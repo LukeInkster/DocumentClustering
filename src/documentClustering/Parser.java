@@ -1,4 +1,4 @@
-package main;
+package documentClustering;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +43,7 @@ public class Parser {
 
 	private Stream<String> splitFile(BufferedReader br) {
 		try {
-			List<String> articleStrings = new ArrayList<String>();
+			Stream.Builder<String> articleStrings = Stream.builder();
 			String ln;
 			while ((ln = br.readLine()) != null)
 			{
@@ -55,10 +54,9 @@ public class Parser {
 					sb.append(ln).append("\n");
 					ln = br.readLine();
 				}
-
 				articleStrings.add(sb.toString());
 			}
-			return articleStrings.stream();
+			return articleStrings.build();
 		}
 		catch (IOException e) { throw new RuntimeException(e); }
 	}

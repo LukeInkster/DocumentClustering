@@ -3,8 +3,10 @@ package main;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Article {
 
@@ -14,7 +16,9 @@ public class Article {
 	public final Date date;
 
 	private List<String> words;
+	private Set<String> distinctWords = new HashSet<String>();
 	private Map<String, Integer> tf;
+	private Map<String, Double> tfidf;
 
 	public Article(String title, String body, String topics, Date date){
 		this.title = title;
@@ -23,12 +27,23 @@ public class Article {
 		this.date = date;
 	}
 
+	public int tf(String s){
+		return tf().containsKey(s) ? tf().get(s) : 0;
+	}
+	
+	public double tfidf(String s){
+		if (this.tfidf == null) throw new RuntimeException("tfidf not initialised. Call tfidf(df) first");
+		if (!this.tfidf.containsKey(s)) return 0;
+		return this.tfidf.get(s);
+	}
+
 	public Map<String, Double> tfidf(Map<String, Integer> df){
+		if (tfidf != null) return this.tfidf;
 		Map<String, Double> tfidf = new HashMap<String, Double>();
 		tf.forEach((k, v) -> {
 			tfidf.put(k, ((double)v)/((double)df.get(k)));
 		});
-		return tfidf;
+		return this.tfidf = tfidf;
 	}
 
 	public Map<String, Integer> tf(){
@@ -42,6 +57,7 @@ public class Article {
 			else tf.put(word, 1);
 		}
 
+		distinctWords.addAll(tf.keySet());
 		return this.tf = tf;
 	}
 
@@ -53,4 +69,7 @@ public class Article {
 		return Arrays.asList(s.split("\\s+"));
 	}
 
+	public Set<String> distinctWords() {
+		return distinctWords;
+	}
 }

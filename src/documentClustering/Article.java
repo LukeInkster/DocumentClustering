@@ -37,11 +37,11 @@ public class Article {
 		return this.tfidf.get(s);
 	}
 
-	public Map<String, Double> tfidf(Map<String, Integer> df){
+	public Map<String, Double> tfidf(Map<String, Double> df){
 		if (tfidf != null) return tfidf;
 		tfidf = new HashMap<String, Double>();
 		tf.forEach((k, v) -> {
-			tfidf.put(k, ((double)v)/((double)df.get(k)));
+			tfidf.put(k, Math.log(((double)v)/df.get(k)));
 		});
 		return tfidf;
 	}

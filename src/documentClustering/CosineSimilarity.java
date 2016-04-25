@@ -16,10 +16,15 @@ public class CosineSimilarity {
 			bVals[i] = b.tfidf(w);
 			++i;
 		}
-		return Math.cos(
+
+//		System.out.println(sumProducts(aVals, bVals));
+//		System.out.println(vecLen(aVals));
+//		System.out.println(vecLen(bVals));
+
+		return //Math.cos(
 				sumProducts(aVals, bVals) /
-				(vecLen(aVals) * vecLen(bVals))
-			);
+				(vecLen(aVals) * vecLen(bVals));
+			//);
 	}
 
 	private static double sumProducts(double[] aVals, double[] bVals) {

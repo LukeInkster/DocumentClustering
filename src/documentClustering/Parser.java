@@ -102,7 +102,7 @@ public class Parser {
 		return text.substring(start, end);
 	}
 
-	public static BufferedReader toBufferedReader(File f){
+	private static BufferedReader toBufferedReader(File f){
 		try { return new BufferedReader(new FileReader(f)); }
 		catch (FileNotFoundException e) { throw new RuntimeException(e); }
 	}
@@ -110,6 +110,26 @@ public class Parser {
 	private String lineFrom(BufferedReader br) {
 		try { return br.readLine();	}
 		catch (IOException e) { throw new RuntimeException(e); }
+	}
+
+	public static String clean(String s){
+		return s.replaceAll("[\\W&&[^\\s]]", "").toLowerCase();
+	}
+
+	public static List<String> cleanAndSplit(String s) {
+		return Arrays.stream(s
+				.replace("-", " ")
+				.replace(",", " ")
+				.replace(".", " ")
+				.replaceAll("[\\W&&[^\\s]]", "")
+				.toLowerCase()
+				.split("\\W+")
+			)
+			.filter(x -> !x.matches("[0-9]+"))
+			.filter(x -> !x.equals(""))
+			.filter(x -> !x.equals(" "))
+			.filter(x -> !StopWords.contains(x))
+			.collect(Collectors.toList());
 	}
 }
 

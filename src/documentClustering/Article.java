@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Article {
 
@@ -44,12 +45,13 @@ public class Article {
 		return tfidf.get(s);
 	}
 
-	public Tfidf tfidf(Map<String, Double> df){
+	public Tfidf tfidf(Map<String, Double> idf){
 		if (tfidf != null) return tfidf;
 
-		tfidf = new Tfidf();
+		tfidf = new Tfidf(tf.size());
 		tf.forEach((k, v) -> {
-			tfidf.put(k, Math.log(((double)v)/df.get(k)));
+			if (v == 0) tfidf.put(k, 0);
+			else tfidf.put(k, (((double)v)/bodyWords().size()) * idf.get(k));
 		});
 
 		return tfidf;
@@ -77,7 +79,7 @@ public class Article {
 	}
 
 	private static List<String> toWords(String s){
-		return Arrays.asList(s.split("\\s+"));
+		return Parser.cleanAndSplit(s);
 	}
 
 	public Set<String> distinctWords() {

@@ -7,12 +7,14 @@ public class KMeans {
 	public static List<Cluster> cluster(List<Article> articles, int numClusters){
 		List<Cluster> clusters = new ArrayList<Cluster>(numClusters);
 		for (int i = 0; i < numClusters; i++){
-			clusters.add(new Cluster(articles.get(i)));
+			clusters.add(new Cluster(articles.get((int)(Math.random() * articles.size()))));
 		}
 
-		for (int i = 0; i < 5; i++){
-			System.out.println("KMeans iteration " + i);
+		for (int i = 0; i < 10; i++){
+			long start = System.currentTimeMillis();
 			clusters = recalculateClusters(clusters, articles);
+			System.out.println("KMeans iteration " + i + " completed in " +
+					(System.currentTimeMillis() - start) + " ms");
 		}
 		return clusters;
 	}

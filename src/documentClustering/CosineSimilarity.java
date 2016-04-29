@@ -1,42 +1,21 @@
 package documentClustering;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 public class CosineSimilarity {
 	public static double of(Tfidf a, Tfidf b){
-		Set<String> allWords = unionWords(a, b);
-		double[] aVals = new double[allWords.size()];
-		double[] bVals = new double[allWords.size()];
-		int i = 0;
-		for (String w : allWords){
-			aVals[i] = a.get(w);
-			bVals[i] = b.get(w);
-			++i;
-		}
-
-		return sumProducts(aVals, bVals) /
-				(vecLen(aVals) * vecLen(bVals));
+		return sumProducts(a, b)
+			/ (vecLen(a) * vecLen(b));
 	}
 
-	private static double sumProducts(double[] aVals, double[] bVals) {
-		if (aVals.length != bVals.length)
-			throw new RuntimeException("Array lengths must be equal");
-
-		return IntStream
-			.range(0, aVals.length)
-			.mapToDouble(x -> aVals[x] * bVals[x])
-			.sum();
+	private static double sumProducts(Tfidf a, Tfidf b) {
+		return unionWords(a, b).stream()
+				.mapToDouble(x -> a.get(x) * b.get(x)).sum();
 	}
 
-	private static double vecLen(double[] vals) {
-		return Math.sqrt(
-				Arrays.stream(vals)
-					.map(x -> x * x)
-					.sum()
-				);
+	private static double vecLen(Tfidf tfidf) {
+		return tfidf.vecLen();
 	}
 
 	private static Set<String> unionWords(Tfidf a, Tfidf b) {

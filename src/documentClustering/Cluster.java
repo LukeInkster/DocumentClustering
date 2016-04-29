@@ -30,15 +30,17 @@ public class Cluster {
 		if (tfidf != null) return tfidf;
 		if (articles.size() == 1) return tfidf = articles.get(0).tfidf;
 		Set<String> allWords = allWords();
-		tfidf = new Tfidf();
+		tfidf = new Tfidf(allWords.size());
 		for (String word : allWords){
-			tfidf.put(word,
-				articles
+			double avgTfidf = articles
 					.stream()
 					.mapToDouble(a -> a.tfidf(word))
 					.average()
-					.getAsDouble());
+					.getAsDouble();
+
+			if (avgTfidf > 0.0001) tfidf.put(word, avgTfidf);
 		}
+		System.out.println(tfidf.entrySet().size());
 		return tfidf;
 	}
 

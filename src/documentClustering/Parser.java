@@ -127,7 +127,7 @@ public class Parser {
 				.toLowerCase()
 				.split("\\W+")
 			)
-			.filter(Parser::isNotNumber)
+			//.filter(Parser::isNotNumber)
 			.filter(Parser::isNotWhitespace)
 			.map(Stemmer::stem)
 			.map(Thesaurus::map)

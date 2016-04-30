@@ -2,9 +2,12 @@ package documentClustering;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Cluster {
 	public final List<Article> articles;
@@ -50,5 +53,30 @@ public class Cluster {
 			words.addAll(a.distinctWords());
 		}
 		return words;
+	}
+
+	public Optional<String> mostCommonTopic(){
+		List<String> allTopics = articles
+			.stream()
+			.flatMap(a -> a.topics.stream())
+			.collect(Collectors.toList());
+
+		return allTopics
+			.stream()
+			.max((x,y) ->
+				Collections.frequency(allTopics, x) -
+				Collections.frequency(allTopics, y));
+	}
+
+	/**
+	 * @return The proportion of articles that contain the most common topic in the cluster
+	 */
+	public double purity(){
+		Optional<String> mostCommon = mostCommonTopic();
+
+		if (!mostCommon.isPresent()) return 1;
+
+		return (double)articles.stream().filter(a -> a.topics.contains(mostCommon.get())).count() /
+				(double)articles.size();
 	}
 }

@@ -40,6 +40,8 @@ public class Parser {
 			.map(Parser::toBufferedReader)
 			.flatMap(this::splitFile)
 			.map(this::parseArticle)
+			.filter(a -> !a.topics.isEmpty())
+			.filter(a -> !a.bodyWords().isEmpty())
 			.collect(Collectors.toList());
 	}
 
@@ -125,12 +127,20 @@ public class Parser {
 				.toLowerCase()
 				.split("\\W+")
 			)
-			.filter(x -> !x.matches("[0-9]+"))
-			.filter(x -> !x.equals(""))
-			.filter(x -> !x.equals(" "))
-			.filter(x -> !StopWords.contains(x))
-//			.map(Thesaurus::map)
+			.filter(Parser::isNotNumber)
+			.filter(Parser::isNotWhitespace)
+			.map(Stemmer::stem)
+			.map(Thesaurus::map)
+			.filter(StopWords::isSafe)
 			.collect(Collectors.toList());
+	}
+
+	public static boolean isNotNumber(String s){
+		return !s.matches("[0-9]+");
+	}
+
+	public static boolean isNotWhitespace(String s){
+		return !s.matches("\\s*");
 	}
 }
 

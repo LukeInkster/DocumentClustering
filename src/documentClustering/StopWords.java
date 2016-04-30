@@ -16,6 +16,10 @@ public class StopWords {
 		return words.contains(s);
 	}
 
+	public static boolean isSafe(String s){
+		return !contains(s);
+	}
+
 	private static Set<String> getWords() {
 		try {
 			return Arrays.stream(

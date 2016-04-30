@@ -40,7 +40,7 @@ public class Cluster {
 
 			if (avgTfidf > 0.0001) tfidf.put(word, avgTfidf);
 		}
-		System.out.println(tfidf.entrySet().size());
+		//System.out.println(tfidf.entrySet().size());
 		return tfidf;
 	}
 

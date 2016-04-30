@@ -3,10 +3,8 @@ package documentClustering;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -14,7 +12,7 @@ public class Main {
 		long start = System.currentTimeMillis();
 
 		File data = new File("data");
-		List<Article> articles = new Parser(data).parse();
+		List<Article> articles = new Parser(data).parse().subList(0, 5000);
 
 		System.out.println("Finished reading " + articles.size() + " articles in "
 				+ (System.currentTimeMillis() - start) + "ms");
@@ -39,6 +37,8 @@ public class Main {
 				+ (System.currentTimeMillis() - start) + "ms");
 
 		System.out.println(articles.get(0).tfidf.entrySet().stream().map(x -> x.getKey() + " : " + x.getValue()+ "\n").collect(Collectors.toList()));
+
+		//System.out.println(Thesaurus.map.entrySet().stream().sorted((x,y) -> x.getValue().compareTo(y.getValue())).map(e -> e.getKey() + " -> " + e.getValue() + "\n").collect(Collectors.toList()));
 
 		System.out.println(articles
 				.subList(1, articles.size())
@@ -69,7 +69,7 @@ public class Main {
 //			System.out.println(e.getKey() + ": " + e.getValue());
 //		}
 
-		List<Cluster> clusters = KMeans.cluster(articles, 10);
+		List<Cluster> clusters = KMeans.cluster(articles, 135);
 		for (Cluster c : clusters){
 			System.out.println(c.articles.size());
 		}

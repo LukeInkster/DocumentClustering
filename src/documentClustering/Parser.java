@@ -129,6 +129,7 @@ public class Parser {
 			.filter(x -> !x.equals(""))
 			.filter(x -> !x.equals(" "))
 			.filter(x -> !StopWords.contains(x))
+//			.map(Thesaurus::map)
 			.collect(Collectors.toList());
 	}
 }

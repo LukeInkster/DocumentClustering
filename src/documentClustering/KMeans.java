@@ -10,7 +10,7 @@ public class KMeans {
 			clusters.add(new Cluster(articles.get((int)(Math.random() * articles.size()))));
 		}
 
-		for (int i = 0; i < 10; i++){
+		for (int i = 0; i < 5; i++){
 			long start = System.currentTimeMillis();
 			clusters = recalculateClusters(clusters, articles);
 			System.out.println("KMeans iteration " + i + " completed in " +

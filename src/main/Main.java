@@ -1,4 +1,4 @@
-package documentClustering;
+package main;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import clustering.Cluster;
+import clustering.CosineSimilarity;
+import clustering.KMeans;
 
 public class Main {
 	public static void main(String[] args) throws IOException {

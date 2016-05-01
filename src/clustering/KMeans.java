@@ -1,8 +1,10 @@
-package documentClustering;
+package clustering;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import main.Article;
 
 public class KMeans {
 	public static List<Cluster> cluster(List<Article> articles, int numClusters){

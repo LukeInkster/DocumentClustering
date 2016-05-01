@@ -1,4 +1,4 @@
-package documentClustering;
+package cleaning;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import main.Parser;
 
 public class Thesaurus {
 	public static Map<String, String> map = getWords();

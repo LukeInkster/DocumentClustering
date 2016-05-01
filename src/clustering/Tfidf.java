@@ -1,4 +1,4 @@
-package documentClustering;
+package clustering;
 
 import java.util.Collection;
 import java.util.HashMap;

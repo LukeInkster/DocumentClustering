@@ -1,4 +1,4 @@
-package documentClustering;
+package cleaning;
 
 import java.io.*;
 

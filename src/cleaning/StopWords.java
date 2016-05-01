@@ -1,4 +1,4 @@
-package documentClustering;
+package cleaning;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import main.Parser;
 
 public class StopWords {
 	public static Set<String> words = getWords();

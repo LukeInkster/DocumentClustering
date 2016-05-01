@@ -1,4 +1,4 @@
-package documentClustering;
+package main;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +15,10 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import cleaning.Stemmer;
+import cleaning.StopWords;
+import cleaning.Thesaurus;
 
 public class Parser {
 	private static final SimpleDateFormat dateFormat =

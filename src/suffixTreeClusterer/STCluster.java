@@ -1,35 +1,3 @@
-// Copyright (c) 2010 Gratian Lup. All rights reserved.
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//
-// * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following
-// disclaimer in the documentation and/or other materials provided
-// with the distribution.
-//
-// * The name "DocumentClustering" must not be used to endorse or promote
-// products derived from this software without prior written permission.
-//
-// * Products derived from this software may not be called "DocumentClustering" nor
-// may "DocumentClustering" appear in their names without prior written
-// permission of the author.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 package suffixTreeClusterer;
 
 import java.util.ArrayList;
@@ -59,9 +27,9 @@ public final class STCluster implements Comparable<STCluster> {
 		phrases.add(phrase);
 	}
 
-	// Computes the weight of the clusters based on the contained documents.
+	// Computes the weight of the clusters based on the contained articles.
 	public double computeWeight() {
-		// The weight is equal to the product between the number of documents, the (adjusted) length of
+		// The weight is equal to the product between the number of articles, the (adjusted) length of
 		// the sentences and the sum of the weight of each word's part of the sentences.
 		double wordWeight = phrases.stream().mapToDouble(p -> p.weight()).sum();
 		return weight = articles.size() * phrasesWeight() * wordWeight;
@@ -69,14 +37,14 @@ public final class STCluster implements Comparable<STCluster> {
 
 	/*
 	 * Returns the 'distance' between this cluster and another. The distance can
-	 * be thought of as the average similarity of the documents in the two clusters.
+	 * be thought of as the average similarity of the articles in the two clusters.
 	 * i.e. a measure of how overlapping the clusters are. If the two clusters are exactly
 	 * identical then the similarity would be 1. If there is no overlap then the distance would be 0.
 	 */
 	public double similarity(STCluster other) {
 		Set<Article> articleSet = new HashSet<Article>(articles);
 
-		// Check which of the documents from the other cluster are found in this cluster.
+		// Check which of the articles from the other cluster are found in this cluster.
 		double common = other.articles.stream().filter(articleSet::contains).count();
 
 		double dist_forward = common / (double) articles.size();
@@ -91,14 +59,14 @@ public final class STCluster implements Comparable<STCluster> {
 		STCluster newCluster = new STCluster(clusters.size() * 2, clusters.size());
 		Set<Article> allArticles = new HashSet<>();
 
-		// Each document must appear a single time in the new cluster, as must
+		// Each article must appear a single time in the new cluster, as must
 		// each Phrase in each original cluster.
 		for (STCluster c : clusters) {
 			allArticles.addAll(c.articles);
 			newCluster.phrases.addAll(c.phrases);
 		}
 
-		// Add the documents to the new cluster.
+		// Add the articles to the new cluster.
 		newCluster.articles.addAll(allArticles);
 		return newCluster;
 	}

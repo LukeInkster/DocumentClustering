@@ -39,6 +39,8 @@ public class Main {
 		Set<STCluster> stClusters = SuffixTreeClusterer
 				.Cluster(articles, Integer.MAX_VALUE, 0, new MinDegreeClusterMerger(0.99));
 
+		
+		
 		System.out.println(SuffixTreeClusterer.articleSet.tree.root.edgeWords());
 		for (STCluster c : stClusters
 				.stream()

@@ -1,4 +1,4 @@
-package suffixTreeClusterer;
+package junk;
 
 import suffixTreeClusterer.AbstractOverlappingClusterMerger.GraphVertex;
 

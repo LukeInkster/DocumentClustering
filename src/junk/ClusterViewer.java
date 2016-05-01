@@ -1,4 +1,4 @@
-package suffixTreeClusterer;
+package junk;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -69,10 +69,10 @@ public class ClusterViewer extends JPanel {
         int width = 0;
 
         for (Edge edge : node.edges()) {
-            NodeInfo child = LayoutNodes(edge.toNode, level + 1);
+            NodeInfo child = LayoutNodes(edge.parent, level + 1);
             nodeInfo.Children.add(child);
 
-            if(edge.toNode.isLeaf()) {
+            if(edge.parent.isLeaf()) {
                 width += SIZE;
             }
             else {

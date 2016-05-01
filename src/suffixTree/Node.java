@@ -45,4 +45,8 @@ public final class Node {
     public String toString() {
         return isLeaf() ? "Leaf" : "Edges: " + edges.size();
     }
+
+    public int size(){
+    	return isLeaf() ? 1 : 1 + edges.values().stream().mapToInt(edge -> edge.parent.size()).sum();
+    }
 }

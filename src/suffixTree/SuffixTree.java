@@ -1,7 +1,12 @@
 package suffixTree;
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+
+import javax.swing.JFrame;
 
 import main.Article;
 import main.Phrase;
@@ -13,25 +18,25 @@ public final class SuffixTree {
     public Node root;
 
     private Suffix activePoint;
-    private int phrases;
-    private Article tempArticle;
+    private List<Phrase> phrases = new ArrayList<Phrase>();
+    public static Article tempArticle;
 
     public SuffixTree() {
         root = new Node();
         tempArticle = new Article();
     }
 
-    public void addSentence(Phrase phrase, Article article) {
-        if(phrases == 0) {
+    public void addPhrase(Phrase phrase, Article article) {
+        if (phrases.isEmpty()) {
             activePoint = new Suffix(root, 0, -1);
         }
 
-        for(Word word : phrase.words) {
+        for (Word word : phrase.words) {
             tempArticle.addWord(word);
             addWord(word, article, phrase.startIndex, phrase.endIndex);
         }
 
-        phrases++;
+        phrases.add(phrase);
     }
 
     // Returns a set containing the base clusters with weight > minWeight.
@@ -43,8 +48,8 @@ public final class SuffixTree {
         for (Edge edge : root.edges()){
             edges.push(edge);
 
-            if(!edge.toNode.isLeaf())
-            	getBaseClustersImpl(edge.toNode, clusters, edges, minWeight);
+            if(!edge.parent.isLeaf())
+            	getBaseClustersImpl(edge.parent, clusters, edges, minWeight);
 
             edges.pop();
         }
@@ -56,16 +61,28 @@ public final class SuffixTree {
         Node parent = null;
         Node lastParent = null; // Used to create links between the nodes.
 
-        // An edge is added (if necessary) for all nodes found
-        // between the active one and the last one. The active node
-        // is the first node which is not a leaf (a leaf node will never
-        // change its type again and will be ignored in the next steps).
-        // The end node is the first node for which an edge must not be added
-        // (and the same for its successors, because they are suffixes for
-        //  the end node and already have the required edges).
+        System.out.println(root.size() + " " + root.edges().size());
+        if (root.size() %100 == 0) {JFrame frame = new JFrame("Clustering");
+        junk.ClusterViewer viewer = new junk.ClusterViewer(root);
+
+        frame.setBackground(Color.WHITE);
+        viewer.setBackground(Color.WHITE);
+        frame.setSize(1024, 800);
+        frame.setContentPane(viewer);
+        frame.setVisible(true);
+
+        while(frame.isVisible()) {
+            try {
+                Thread.sleep(500);
+            } catch(InterruptedException ex) {}
+        }}
+        // An edge is added (if necessary) for all nodes found between the active one and the
+        // last one. The active node is the first node which is not a leaf (a leaf node will never
+        // change its type again and will be ignored in the next steps). The end node is the first
+        // node for which an edge must not be added (and the same for its successors, because they
+        // are suffixes for the end node and already have the required edges).
         while(true) {
             parent = activePoint.origin;
-            if (parent == null) break;
 
             // If the node is explicit (already has edges) check if
             // an edge labeled with the current word must be added.
@@ -100,7 +117,7 @@ public final class SuffixTree {
             if(activePoint.origin == root) {
                 // If the active node is the root of the tree
                 // the next suffix follows the natural order.
-                activePoint.firstIndex = activePoint.firstIndex + 1;
+                activePoint.firstIndex += 1;
             }
             else {
                 // For internal nodes a link is used.
@@ -123,9 +140,7 @@ public final class SuffixTree {
 
     private Node splitEdge(Edge edge, Suffix suffix, Article document) {
         Node newNode = new Node();
-        Edge newEdge = new Edge(document, edge.firstIndex,
-                                edge.firstIndex + suffix.span(),
-                                suffix.origin, newNode);
+        Edge newEdge = new Edge(document, edge.firstIndex, edge.firstIndex + suffix.span(), suffix.origin, newNode);
 
         // Replace the old edge with the new one.
         suffix.origin.addEdge(tempArticle.wordAt(edge.firstIndex), newEdge);
@@ -133,7 +148,7 @@ public final class SuffixTree {
 
         // Adjust the new edge (the associated node remains a leaf).
         edge.firstIndex = edge.firstIndex + suffix.span() + 1;
-        edge.fromNode = newNode;
+        edge.child = newNode;
         newNode.addEdge(tempArticle.wordAt(edge.firstIndex), edge);
         return newNode;
     }
@@ -148,7 +163,7 @@ public final class SuffixTree {
 
         while(edge.span() <= suffix.span()) {
             suffix.firstIndex = suffix.firstIndex + edge.span() + 1;
-            suffix.origin = edge.toNode;
+            suffix.origin = edge.parent;
 
             if(suffix.firstIndex <= suffix.lastIndex) {
                 // Search can continue at the next level.
@@ -171,11 +186,11 @@ public final class SuffixTree {
     }
 
     private STCluster getBaseClustersImpl(Node node, Set<STCluster> clusters, Stack<Edge> edges, double minWeight) {
-        // Create a new cluster and set the associated sentence.
+        // Create a new cluster and set the associated phrase.
         STCluster cluster = new STCluster(makePhrase(edges));
 
         for (Edge edge : node.edges()){
-            Node nextNode = edge.toNode;
+            Node nextNode = edge.parent;
 
             if(nextNode.isLeaf()) {
                 // Add the document to the cluster.
@@ -189,20 +204,17 @@ public final class SuffixTree {
                 edges.push(edge);
                 STCluster child = getBaseClustersImpl(nextNode, clusters, edges, minWeight);
                 edges.pop();
-                int count = child.articles.size();
 
-                for(int i = 0; i < count; i++) {
-                    Article doc = child.articles.get(i);
-
-                    if(!cluster.articles.contains(doc)) {
-                        cluster.articles.add(doc);
+                for(Article article : child.articles) {
+                    if(!cluster.articles.contains(article)) {
+                        cluster.articles.add(article);
                     }
                 }
             }
         }
 
         // The cluster is selected if it's weight is at least the minimum requested weight.
-        if(cluster.computeWeight() > minWeight) clusters.add(cluster);
+        if (cluster.computeWeight() > minWeight) clusters.add(cluster);
 
         return cluster;
     }

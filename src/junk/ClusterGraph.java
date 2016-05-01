@@ -1,4 +1,4 @@
-package suffixTreeClusterer;
+package junk;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

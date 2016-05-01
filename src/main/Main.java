@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import kMeans.Cluster;
 import kMeans.CosineSimilarity;
 import kMeans.KMeans;
-import suffixTreeClusterer.MinDegreeClusterMerger;
 import suffixTreeClusterer.STCluster;
 import suffixTreeClusterer.SuffixTreeClusterer;
 
@@ -37,10 +36,8 @@ public class Main {
 
 		System.out.println(articles.size());
 		Set<STCluster> stClusters = SuffixTreeClusterer
-				.Cluster(articles, Integer.MAX_VALUE, 0, new MinDegreeClusterMerger(0.99));
+				.Cluster(articles, Integer.MAX_VALUE, 0);
 
-		
-		
 		System.out.println(SuffixTreeClusterer.articleSet.tree.root.edgeWords());
 		for (STCluster c : stClusters
 				.stream()

@@ -5,18 +5,15 @@ public final class Suffix {
     public int firstIndex;
     public int lastIndex;
 
-    public Suffix() {
-
-    }
-
     public Suffix(Node origin, int first, int last) {
         this.origin = origin;
         this.firstIndex = first;
         this.lastIndex = last;
+        if (origin == null) throw new RuntimeException();
     }
 
     /**
-     * @return True if the node is represents an actual phrase end
+     * @return True if the node represents an actual phrase end
      */
     public boolean isExplicit() {
         return firstIndex > lastIndex;

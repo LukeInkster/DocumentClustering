@@ -41,18 +41,18 @@ public final class STCluster implements Comparable<STCluster> {
 	 * i.e. a measure of how overlapping the clusters are. If the two clusters are exactly
 	 * identical then the similarity would be 1. If there is no overlap then the distance would be 0.
 	 */
-	public double similarity(STCluster other) {
-		Set<Article> articleSet = new HashSet<Article>(articles);
-
-		// Check which of the articles from the other cluster are found in this cluster.
-		double common = other.articles.stream().filter(articleSet::contains).count();
-
-		double dist_forward = common / (double) articles.size();
-		double dist_backward = common / (double) other.articles.size();
-
-		// Return the average distance between these two clusters.
-		return (dist_forward + dist_backward) / 2.0 ;
-	}
+//	public double similarity(STCluster other) {
+//		Set<Article> articleSet = new HashSet<Article>(articles);
+//
+//		// Check which of the articles from the other cluster are found in this cluster.
+//		double common = other.articles.stream().filter(articleSet::contains).count();
+//
+//		double dist_forward = common / (double) articles.size();
+//		double dist_backward = common / (double) other.articles.size();
+//
+//		// Return the average distance between these two clusters.
+//		return (dist_forward + dist_backward) / 2.0 ;
+//	}
 
 	// Joins clusters from the set into one cluster containing the union of the articles
 	public static STCluster merge(Set<STCluster> clusters) {
@@ -88,15 +88,10 @@ public final class STCluster implements Comparable<STCluster> {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Cluster: ");
-		sb.append(label);
-		sb.append("; Weight: ");
-		sb.append(weight);
-		sb.append("; Number docs: ");
-		sb.append(articles.size());
-		for (Phrase p : phrases) {
-			sb.append(p.toString());
-		}
+		sb.append("Cluster: " + label);
+		sb.append("; Weight: " + weight);
+		sb.append("; Number docs: " + articles.size());
+		for (Phrase p : phrases) sb.append(p.toString());
 		return sb.toString();
 	}
 

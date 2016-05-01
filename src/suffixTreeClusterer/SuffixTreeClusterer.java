@@ -34,7 +34,7 @@ public final class SuffixTreeClusterer {
 	 *            The minimum weight of a cluster to be considered.
 	 * @return A list with all clusters meeting the specified conditions.
 	 */
-	public static Set<STCluster> Cluster(List<Article> articles, int maxClusters, double minClusterWeight, IClusterMerger merger) {
+	public static Set<STCluster> Cluster(List<Article> articles, int maxClusters, double minClusterWeight) {
 		// Read all documents and get the base clusters.
 		// The weight of each one is computed and is used to sort them
 		// in ascending order. The first maxClusters clusters are created by
@@ -58,7 +58,7 @@ public final class SuffixTreeClusterer {
 
 		baseClusterSet.clear();
 		baseClusterSet.addAll(baseClusterList.subList(0, limit));
-		Set<STCluster> finalClusters = merger.mergeClusters(baseClusterSet);
+		Set<STCluster> finalClusters = baseClusterSet;//merger.mergeClusters(baseClusterSet);
 
 		if (limit < baseClusterSet.size()) {
 			// Some base clusters remained, group them under a single cluster.

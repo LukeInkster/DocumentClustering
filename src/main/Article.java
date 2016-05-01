@@ -108,12 +108,12 @@ public class Article {
 	}
 
 	public List<Word> toWordObjects(){
-		//if (suffixTreeWords == null){
-//			suffixTreeWords = phrases()
-//					.stream()
-//					.flatMap(p -> p.words.stream())
-//					.collect(Collectors.toList());
-		//}
+		if (suffixTreeWords == null){
+			suffixTreeWords = phrases()
+					.stream()
+					.flatMap(p -> p.words.stream())
+					.collect(Collectors.toList());
+		}
 		return suffixTreeWords;
 	}
 

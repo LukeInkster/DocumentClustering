@@ -16,7 +16,7 @@ public final class ArticleSet {
 
 		for (Article article : articles){
 			for (Phrase phrase : article.phrases()){
-				tree.addSentence(phrase, article);
+				tree.addPhrase(phrase, article);
 			}
 		}
 	}

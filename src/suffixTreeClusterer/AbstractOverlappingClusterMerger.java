@@ -14,7 +14,7 @@ public abstract class AbstractOverlappingClusterMerger implements IClusterMerger
 	/**
 	 * Returns a list of {@link GraphVertex} objects describing the list of base
 	 * clusters passed to it.
-	 * 
+	 *
 	 * @param baseClusters
 	 *            - clusters for which to generate info.
 	 * @return
@@ -57,8 +57,7 @@ public abstract class AbstractOverlappingClusterMerger implements IClusterMerger
 		public void setDiscovered(boolean value) {
 			discovered = value;
 		}
-		
-		@Override
+
 		public GraphVertex clone() {
 			return new GraphVertex(cluster);
 		}

@@ -45,7 +45,6 @@ public final class ClusterFinder {
 
 	private static ArticleSet articleSet;
 
-	// Function used for unit tests.
 	public static Node ParseSource(List<Article> articles) {
 		ArticleSet reader = new ArticleSet(articles);
 		return reader.tree().root;
@@ -67,8 +66,7 @@ public final class ClusterFinder {
 	 *            The minimum weight of a cluster to be considered.
 	 * @return A list with all clusters meeting the specified conditions.
 	 */
-	public static Set<Cluster> Find(List<Article> articles, int maxClusters,
-			double minClusterWeight, IClusterMerger merger) {
+	public static Set<Cluster> Find(List<Article> articles, int maxClusters, double minClusterWeight, IClusterMerger merger) {
 		// Read all documents and get the base clusters.
 		// The weight of each one is computed and is used to sort them
 		// in ascending order. The first maxClusters clusters are created by
@@ -97,7 +95,7 @@ public final class ClusterFinder {
 		if (limit < baseClusterSet.size()) {
 			// Some base clusters remained, group them under a single cluster.
 			Cluster other = Cluster.Merge(baseClusterList.subList(limit, baseClusterList.size()));
-			other.setLabel("Other");
+			other.label = "Other";
 			finalClusters.add(other);
 		}
 

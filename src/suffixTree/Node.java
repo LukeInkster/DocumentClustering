@@ -6,19 +6,20 @@ import java.util.Iterator;
 import main.Word;
 
 public final class Node {
-    // The suffix node is the last node of the suffix obtained
-    // by considering all nodes from the root to it.
-    // It is the point where the next insertion must be made.
-    private Node suffixNode;
-    private HashMap<Word, Edge> edges; // The edges to the child nodes.
+    // The last node of the suffix obtained by considering all nodes from
+	// the root to it. It is the point where the next insertion must be made.
+    public Node suffixNode;
+
+    // The edges to the child nodes.
+    private HashMap<Word, Edge> edges;
 
     public Node() {
         edges = new HashMap<Word, Edge>(4);
     }
 
-    public Node suffixNode() { return suffixNode; }
-    public void setSuffixNode(Node value) { suffixNode = value; }
-    public Iterator<Edge> edges() { return edges.values().iterator(); }
+    public Iterator<Edge> edges() {
+    	return edges.values().iterator();
+    }
 
     public boolean hasEdge(Word word) {
         return edges.containsKey(word);
@@ -37,6 +38,6 @@ public final class Node {
     }
 
     public String toString() {
-        return isLeaf() ? "Leaf" : "Edges: " + Integer.toString(edges.size());
+        return isLeaf() ? "Leaf" : "Edges: " + edges.size();
     }
 }

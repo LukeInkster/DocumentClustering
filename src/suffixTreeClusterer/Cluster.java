@@ -33,19 +33,21 @@
 package suffixTreeClusterer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import main.Article;
 import main.Phrase;
 
 public final class Cluster implements Comparable<Cluster> {
-	private List<Article> articles;
+	public List<Article> articles;
 	private List<Phrase> phrases;
-	private double weight;
-	private String label;
+	public double weight;
+	String label;
 
 	public Cluster(int docCapacity, int phraseCapacity) {
 		articles = new ArrayList<Article>(docCapacity);
@@ -79,21 +81,10 @@ public final class Cluster implements Comparable<Cluster> {
 	 * identical then the similarity would be 1. If there is no overlap then the distance would be 0.
 	 */
 	public double similarity(Cluster other) {
-		Hashtable<Article, Article> hash = new Hashtable<Article, Article>();
+		Set<Article> articleSet = new HashSet<Article>(articles);
 
-		for (int i = 0; i < articles.size(); i++) {
-			Article doc = articles.get(i);
-			hash.put(doc, doc);
-		}
-
-		// Check which of the documents from the other clusters
-		// are found in the hash table.
-		double common = 0;
-		for (int i = 0; i < other.articles.size(); i++) {
-			if (hash.containsKey(other.articles.get(i))) {
-				common++;
-			}
-		}
+		// Check which of the documents from the other cluster are found in this cluster.
+		double common = other.articles.stream().filter(articleSet::contains).count();
 
 		double dist_forward = common / (double) articles.size();
 		double dist_backward = common / (double) other.articles.size();
@@ -114,7 +105,7 @@ public final class Cluster implements Comparable<Cluster> {
 		// each Phrase in each original cluster.
 		for (Cluster c : clusters) {
 			allArticles.addAll(c.articles);
-			newCluster.phrases().addAll(c.phrases());
+			newCluster.phrases.addAll(c.phrases);
 		}
 
 		// Add the documents to the new cluster.
@@ -128,43 +119,9 @@ public final class Cluster implements Comparable<Cluster> {
 		return Merge(clusterSet);
 	}
 
-	public double Weight() {
-		return weight;
-	}
-
-	public List<Article> Articles() {
-		return articles;
-	}
-
-	public List<Phrase> phrases() {
-		return phrases;
-	}
-
-	public void setPhrases(List<Phrase> value) {
-		phrases = value;
-	}
-
-	public String label() {
-		return label;
-	}
-
-	public void setLabel(String value) {
-		label = value;
-	}
-
 	private double phrasesWeight() {
-		double sum = 0;
-		int count = phrases.size();
-
-		for (int i = 0; i < count; i++) {
-			sum += phrases.get(i).words.size();
-		}
-
-		if (sum < 2) {
-			return 0.5;
-		} else {
-			return Math.min(6, sum);
-		}
+		double sum = phrases.stream().mapToDouble(p -> p.words.size()).sum();
+		return sum < 2 ? 0.5 : Math.min(6, sum);
 	}
 
 	public int compareTo(Cluster other) {

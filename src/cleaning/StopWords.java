@@ -29,7 +29,7 @@ public class StopWords {
 					.readLine()
 					.split(",")
 				)
-				.map(Parser::clean)
+				.map(Cleaner::clean)
 				.collect(Collectors.toSet());
 		} catch (IOException e) {
 			throw new RuntimeException(e);

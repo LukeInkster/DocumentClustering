@@ -117,34 +117,5 @@ public class Parser {
 		try { return br.readLine();	}
 		catch (IOException e) { throw new RuntimeException(e); }
 	}
-
-	public static String clean(String s){
-		return s.replaceAll("[\\W&&[^\\s]]", "").toLowerCase();
-	}
-
-	public static List<String> cleanAndSplit(String s) {
-		return Arrays.stream(s
-				.replace("-", " ")
-				.replace(",", " ")
-				.replace(".", " ")
-				.replaceAll("[\\W&&[^\\s]]", "")
-				.toLowerCase()
-				.split("\\W+")
-			)
-			//.filter(Parser::isNotNumber)
-			.filter(Parser::isNotWhitespace)
-			.map(Stemmer::stem)
-			.map(Thesaurus::map)
-			.filter(StopWords::isSafe)
-			.collect(Collectors.toList());
-	}
-
-	public static boolean isNotNumber(String s){
-		return !s.matches("[0-9]+");
-	}
-
-	public static boolean isNotWhitespace(String s){
-		return !s.matches("\\s*");
-	}
 }
 

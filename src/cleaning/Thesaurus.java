@@ -33,7 +33,7 @@ public class Thesaurus {
 					)
 					.filter(s -> !s.contains("-"))
 					.filter(s -> !s.contains("."))
-					.map(Parser::clean)
+					.map(Cleaner::clean)
 					.collect(Collectors.toList()))
 				.map(Thesaurus::toMap)
 				.flatMap(subMap ->

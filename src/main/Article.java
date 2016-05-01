@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cleaning.Cleaner;
 import clustering.Cluster;
 import clustering.CosineSimilarity;
 import clustering.Tfidf;
@@ -81,7 +82,7 @@ public class Article {
 	}
 
 	private static List<String> toWords(String s){
-		return Parser.cleanAndSplit(s);
+		return Cleaner.cleanAndSplit(s);
 	}
 
 	public Set<String> distinctWords() {

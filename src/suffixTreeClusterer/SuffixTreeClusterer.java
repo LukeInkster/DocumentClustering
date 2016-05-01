@@ -41,13 +41,13 @@ import java.util.Set;
 import main.Article;
 import suffixTree.Node;
 
-public final class ClusterFinder {
+public final class SuffixTreeClusterer {
 
-	private static ArticleSet articleSet;
+	public static ArticleSet articleSet;
 
 	public static Node ParseSource(List<Article> articles) {
 		ArticleSet reader = new ArticleSet(articles);
-		return reader.tree().root;
+		return reader.tree.root;
 	}
 
 	/**
@@ -66,7 +66,7 @@ public final class ClusterFinder {
 	 *            The minimum weight of a cluster to be considered.
 	 * @return A list with all clusters meeting the specified conditions.
 	 */
-	public static Set<Cluster> Find(List<Article> articles, int maxClusters, double minClusterWeight, IClusterMerger merger) {
+	public static Set<STCluster> Cluster(List<Article> articles, int maxClusters, double minClusterWeight, IClusterMerger merger) {
 		// Read all documents and get the base clusters.
 		// The weight of each one is computed and is used to sort them
 		// in ascending order. The first maxClusters clusters are created by
@@ -75,34 +75,30 @@ public final class ClusterFinder {
 		// 'Other'.
 		articleSet = new ArticleSet(articles);
 
-		Set<Cluster> baseClusterSet = articleSet.baseClusters(minClusterWeight);
+		Set<STCluster> baseClusterSet = articleSet.baseClusters(minClusterWeight);
 
 		if (baseClusterSet.isEmpty()) {
 			System.out.println("No base clusters were found, this indicates an error in the program.");
-			return new HashSet<Cluster>();
+			return new HashSet<STCluster>();
 		}
 
 		// Select the first 'maxClusters' base clusters.
-		List<Cluster> baseClusterList = new ArrayList<>();
+		List<STCluster> baseClusterList = new ArrayList<>();
 		baseClusterList.addAll(baseClusterSet);
 		Collections.sort(baseClusterList);
 		int limit = Math.min(maxClusters, baseClusterList.size());
 
 		baseClusterSet.clear();
 		baseClusterSet.addAll(baseClusterList.subList(0, limit));
-		Set<Cluster> finalClusters = merger.MergeClusters(baseClusterSet);
+		Set<STCluster> finalClusters = merger.mergeClusters(baseClusterSet);
 
 		if (limit < baseClusterSet.size()) {
 			// Some base clusters remained, group them under a single cluster.
-			Cluster other = Cluster.Merge(baseClusterList.subList(limit, baseClusterList.size()));
+			STCluster other = STCluster.merge(baseClusterList.subList(limit, baseClusterList.size()));
 			other.label = "Other";
 			finalClusters.add(other);
 		}
 
 		return finalClusters;
-	}
-
-	public static ArticleSet getReader() {
-		return articleSet;
 	}
 }

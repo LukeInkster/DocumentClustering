@@ -19,9 +19,9 @@ public abstract class AbstractOverlappingClusterMerger implements IClusterMerger
 	 *            - clusters for which to generate info.
 	 * @return
 	 */
-	public Set<GraphVertex> generateVertices(Set<Cluster> baseClusters) {
+	public Set<GraphVertex> generateVertices(Set<STCluster> baseClusters) {
 		Set<GraphVertex> vertices = new HashSet<>();
-		for (Cluster bc : baseClusters) {
+		for (STCluster bc : baseClusters) {
 			vertices.add(new GraphVertex(bc));
 		}
 
@@ -34,7 +34,7 @@ public abstract class AbstractOverlappingClusterMerger implements IClusterMerger
 
 	class GraphVertex implements Cloneable {
 		/* The cluster that this vertex belongs to. */
-		private Cluster cluster;
+		private STCluster cluster;
 
 		/*
 		 * Whether or not this vertex has been discovered. Used to keep track of
@@ -42,11 +42,11 @@ public abstract class AbstractOverlappingClusterMerger implements IClusterMerger
 		 */
 		private boolean discovered;
 
-		public GraphVertex(Cluster cluster) {
+		public GraphVertex(STCluster cluster) {
 			this.cluster = cluster;
 		}
 
-		public Cluster cluster() {
+		public STCluster cluster() {
 			return cluster;
 		}
 

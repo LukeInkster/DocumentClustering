@@ -40,8 +40,8 @@ import main.Phrase;
 import suffixTree.SuffixTree;
 
 public final class ArticleSet {
-	private List<Article> articles;
-	private SuffixTree tree = new SuffixTree();
+	public final List<Article> articles;
+	public final SuffixTree tree = new SuffixTree();
 
 	public ArticleSet(List<Article> articles){
 		this.articles = articles;
@@ -53,15 +53,7 @@ public final class ArticleSet {
 		}
 	}
 
-	public Set<Cluster> baseClusters(double minWeight) {
+	public Set<STCluster> baseClusters(double minWeight) {
 		return tree.baseClusters(minWeight);
-	}
-
-	public List<Article> articles() {
-		return articles;
-	}
-
-	public SuffixTree tree() {
-		return tree;
 	}
 }

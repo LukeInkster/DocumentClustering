@@ -100,14 +100,12 @@ public class ClusterViewer extends JPanel {
         }
 
         int width = 0;
-        Iterator<Edge> edgeIt = node.edges();
 
-        while(edgeIt.hasNext()) {
-            Edge edge = edgeIt.next();
-            NodeInfo child = LayoutNodes(edge.nextNode, level + 1);
+        for (Edge edge : node.edges()) {
+            NodeInfo child = LayoutNodes(edge.toNode, level + 1);
             nodeInfo.Children.add(child);
 
-            if(edge.nextNode.isLeaf()) {
+            if(edge.toNode.isLeaf()) {
                 width += SIZE;
             }
             else {

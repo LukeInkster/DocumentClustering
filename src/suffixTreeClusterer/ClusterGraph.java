@@ -15,7 +15,7 @@ import java.util.Set;
 import suffixTreeClusterer.AbstractOverlappingClusterMerger.GraphVertex;
 
 /**
- * Represents a graph of {@link Cluster} objects. Useful functions include
+ * Represents a graph of {@link STCluster} objects. Useful functions include
  * {@link #getUniqueEdges()} to deduplicate incoming/outgoing edges as well as
  * {@link #getConnectedComponents()} and {@link #buildMST(ClusterGraph)}.
  *
@@ -174,8 +174,8 @@ public class ClusterGraph {
 	 * Returns a set of the clusters that are contained in this cluster graph.
 	 * @return
 	 */
-	public Set<Cluster> getClusters() {
-		Set<Cluster> clusters = new HashSet<>();
+	public Set<STCluster> getClusters() {
+		Set<STCluster> clusters = new HashSet<>();
 
 		for (GraphVertex v : vertices) {
 			clusters.add(v.cluster());

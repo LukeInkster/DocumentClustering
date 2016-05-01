@@ -45,7 +45,7 @@ public class MinDegreeClusterMerger extends AbstractOverlappingClusterMerger {
 		this.minOverlapDegree = minOverlapDegree;
 	}
 
-	public Set<Cluster> MergeClusters(Set<Cluster> baseClustersToMerge) {
+	public Set<STCluster> mergeClusters(Set<STCluster> baseClustersToMerge) {
 		// Build a graph of similar base clusters.
 		Set<GraphVertex> vertices = generateVertices(baseClustersToMerge);
 		ClusterGraph cg = ClusterGraph.buildGraph(vertices, minOverlapDegree);
@@ -55,10 +55,10 @@ public class MinDegreeClusterMerger extends AbstractOverlappingClusterMerger {
 
 		// Unify the clusters from each connected component
 		// into a single one and add them to the resulting list.
-		Set<Cluster> clusters = new HashSet<>();
+		Set<STCluster> clusters = new HashSet<>();
 		for (ClusterGraph connectedComponent : connectedComponents) {
-			Set<Cluster> clustersInConnectedComponent = connectedComponent.getClusters();
-			clusters.add(Cluster.Merge(clustersInConnectedComponent));
+			Set<STCluster> clustersInConnectedComponent = connectedComponent.getClusters();
+			clusters.add(STCluster.merge(clustersInConnectedComponent));
 		}
 
 		return clusters;

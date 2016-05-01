@@ -1,7 +1,8 @@
 package suffixTree;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 
 import main.Word;
 
@@ -17,8 +18,12 @@ public final class Node {
         edges = new HashMap<Word, Edge>(4);
     }
 
-    public Iterator<Edge> edges() {
-    	return edges.values().iterator();
+    public List<Edge> edges() {
+    	return new ArrayList<Edge>(edges.values());
+    }
+
+    public List<Word> edgeWords() {
+    	return new ArrayList<Word>(edges.keySet());
     }
 
     public boolean hasEdge(Word word) {
@@ -29,7 +34,7 @@ public final class Node {
         edges.put(word, edge);
     }
 
-    public Edge getEdge(Word word) {
+    public Edge edge(Word word) {
         return edges.get(word);
     }
 

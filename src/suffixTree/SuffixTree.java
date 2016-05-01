@@ -1,46 +1,12 @@
-// Copyright (c) 2010 Gratian Lup. All rights reserved.
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//
-// * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following
-// disclaimer in the documentation and/or other materials provided
-// with the distribution.
-//
-// * The name "ArticleClustering" must not be used to endorse or promote
-// products derived from this software without prior written permission.
-//
-// * Products derived from this software may not be called "ArticleClustering" nor
-// may "ArticleClustering" appear in their names without prior written
-// permission of the author.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 package suffixTree;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 import main.Article;
 import main.Phrase;
 import main.Word;
-import suffixTreeClusterer.Cluster;
+import suffixTreeClusterer.STCluster;
 
 public final class SuffixTree {
 
@@ -69,22 +35,18 @@ public final class SuffixTree {
     }
 
     // Returns a set containing the base clusters with weight > minWeight.
-    public Set<Cluster> baseClusters(double minWeight) {
-        Set<Cluster> clusters =  new HashSet<>();
-        ArrayList<Edge> edges = new ArrayList<Edge>();
+    public Set<STCluster> baseClusters(double minWeight) {
+        Set<STCluster> clusters =  new HashSet<STCluster>();
+        Stack<Edge> edges = new Stack<Edge>();
 
-        // Search the clusters on all edges originating from the root.
-        Iterator<Edge> edgeIt = root.edges();
+        // Search the clusters on all edges from the root.
+        for (Edge edge : root.edges()){
+            edges.push(edge);
 
-        while(edgeIt.hasNext()) {
-            Edge edge = edgeIt.next();
-            edges.add(edge);
+            if(!edge.toNode.isLeaf())
+            	getBaseClustersImpl(edge.toNode, clusters, edges, minWeight);
 
-            if(!edge.nextNode.isLeaf()) {
-                getBaseClustersImpl(edge.nextNode, clusters, edges, minWeight);
-            }
-
-            edges.remove(edges.size() - 1);
+            edges.pop();
         }
 
         return clusters;
@@ -109,16 +71,15 @@ public final class SuffixTree {
             // an edge labeled with the current word must be added.
             if(activePoint.isExplicit()) {
                 if(parent.hasEdge(word)) {
-                    break; // The word is already added to an edge.
+                    break; // Word already added to an edge.
                 }
             }
             else if(activePoint.isImplicit()) {
                 // The edge must be split before the word can be added.
-                Edge edge = parent.getEdge(tempArticle.wordAt(activePoint.firstIndex));
+                Edge edge = parent.edge(tempArticle.wordAt(activePoint.firstIndex));
 
                 if(tempArticle.wordAt(edge.firstIndex + activePoint.span() + 1).equals(word)) {
-                    // The word is already in the right place.
-                    break;
+                    break; // Word already in the right place.
                 }
 
                 parent = splitEdge(edge, activePoint, article);
@@ -172,7 +133,7 @@ public final class SuffixTree {
 
         // Adjust the new edge (the associated node remains a leaf).
         edge.firstIndex = edge.firstIndex + suffix.span() + 1;
-        edge.prevNode = newNode;
+        edge.fromNode = newNode;
         newNode.addEdge(tempArticle.wordAt(edge.firstIndex), edge);
         return newNode;
     }
@@ -183,43 +144,38 @@ public final class SuffixTree {
         }
 
         Word word = tempArticle.wordAt(suffix.firstIndex);
-        Edge edge = suffix.origin.getEdge(word);
+        Edge edge = suffix.origin.edge(word);
 
         while(edge.span() <= suffix.span()) {
             suffix.firstIndex = suffix.firstIndex + edge.span() + 1;
-            suffix.origin = edge.nextNode;
+            suffix.origin = edge.toNode;
 
             if(suffix.firstIndex <= suffix.lastIndex) {
                 // Search can continue at the next level.
                 word = tempArticle.wordAt(suffix.firstIndex);
-                edge = suffix.origin.getEdge(word);
+                edge = suffix.origin.edge(word);
             }
         }
     }
 
-    private Phrase makePhrase(List<Edge> edges) {
+    private Phrase makePhrase(Stack<Edge> edges) {
         Phrase phrase = new Phrase();
 
-        for(int i = 0; i < edges.size(); i++) {
-            Edge edge = edges.get(i);
-
-            for(int j = edge.firstIndex; j <= edge.lastIndex; j++) {
-                phrase.words.add(tempArticle.wordAt(j));
+        for(Edge edge : edges) {
+            for(int i = edge.firstIndex; i <= edge.lastIndex; i++) {
+                phrase.words.add(tempArticle.wordAt(i));
             }
         }
 
         return phrase;
     }
 
-    private Cluster getBaseClustersImpl(Node node, Set<Cluster> clusters,
-    		List<Edge> edges, double minWeight) {
+    private STCluster getBaseClustersImpl(Node node, Set<STCluster> clusters, Stack<Edge> edges, double minWeight) {
         // Create a new cluster and set the associated sentence.
-        Cluster cluster = new Cluster(makePhrase(edges));
-        Iterator<Edge> edgeIt = node.edges();
+        STCluster cluster = new STCluster(makePhrase(edges));
 
-        while(edgeIt.hasNext()) {
-            Edge edge = edgeIt.next();
-            Node nextNode = edge.nextNode;
+        for (Edge edge : node.edges()){
+            Node nextNode = edge.toNode;
 
             if(nextNode.isLeaf()) {
                 // Add the document to the cluster.
@@ -228,12 +184,11 @@ public final class SuffixTree {
                 }
             }
             else {
-                // The edge leads to an internal node.
-                // All documents that belong to the cluster associated
-                // with this internal node must be added to the current cluster.
-                edges.add(edge);
-                Cluster child = getBaseClustersImpl(nextNode, clusters, edges, minWeight);
-                edges.remove(edges.size() - 1);
+                // The edge leads to an internal node. All documents that belong to the cluster
+            	// associated with this internal node must be added to the current cluster.
+                edges.push(edge);
+                STCluster child = getBaseClustersImpl(nextNode, clusters, edges, minWeight);
+                edges.pop();
                 int count = child.articles.size();
 
                 for(int i = 0; i < count; i++) {
@@ -246,13 +201,8 @@ public final class SuffixTree {
             }
         }
 
-        // The cluster is selected only if its weight
-        // is at least equal to the minimum requested weight.
-        cluster.ComputeWeight();
-
-        if(cluster.weight > minWeight) {
-            clusters.add(cluster);
-        }
+        // The cluster is selected if it's weight is at least the minimum requested weight.
+        if(cluster.computeWeight() > minWeight) clusters.add(cluster);
 
         return cluster;
     }

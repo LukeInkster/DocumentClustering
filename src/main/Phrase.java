@@ -20,7 +20,7 @@ public final class Phrase {
     	return words.size();
     }
 
-    public double Weight() {
+    public double weight() {
         return words.stream().mapToDouble(w -> w.tfidf).sum();
     }
 

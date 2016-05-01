@@ -32,151 +32,37 @@
 
 package suffixTree;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import main.Article;
+import main.Phrase;
+import main.Word;
+import suffixTreeClusterer.Cluster;
 
 public final class SuffixTree {
-    public final class Node {
-        // The suffix node is the last node of the suffix obtained
-        // by considering all nodes from the root to it.
-        // It is the point where the next insertion must be made.
-        private Node suffixNode_;
-        private HashMap<Word, Edge> edges_; // The edges to the child nodes.
 
-        public Node() {
-            edges_ = new HashMap<Word, Edge>(4);
-        }
-
-        public Node suffixNode() { return suffixNode_; }
-        public void setSuffixNode(Node value) { suffixNode_ = value; }
-        public Iterator<Edge> Edges() { return edges_.values().iterator(); }
-
-        public boolean hasEdge(Word word) {
-            return edges_.containsKey(word);
-        }
-
-        public void addEdge(Word word, Edge edge) {
-            edges_.put(word, edge);
-        }
-
-        public Edge getEdge(Word word) {
-            return edges_.get(word);
-        }
-
-        public boolean IsLeaf() {
-            return edges_.isEmpty();
-        }
-
-        public String toString() {
-            return IsLeaf() ? "Leaf" : "Edges: " + Integer.toString(edges_.size());
-        }
-    }
-
-    public final class Edge {
-        private Article document_; // The document containing the words.
-        private int firstIndex_;    // The index of the first word found on the edge.
-        private int lastIndex_;     // The index of the last word found on the edge.
-        private Node prevNode_;     // The first node connected by the edge.
-        private Node nextNode_;     // The second node connected by the edge.
-
-        public Edge(Article doc, int first, int last,
-                    Node previous, Node next) {
-            document_ = doc;
-            firstIndex_ = first;
-            lastIndex_ = last;
-            prevNode_ = previous;
-            nextNode_ = next;
-        }
-
-        public Article Article() { return document_; }
-
-        public int firstIndex() { return firstIndex_; }
-        public int LastIndex() { return lastIndex_; }
-
-        public void setFirstIndex(int value) { firstIndex_ = value; }
-        public void SetLastIndex(int value) { lastIndex_ = value; }
-
-        public Node PreviousNode() { return prevNode_; }
-        public void setPreviousNode(Node value) { prevNode_ = value; }
-
-        public Node NextNode() { return nextNode_; }
-        public void SetNextNode(Node value) { nextNode_ = value; }
-
-        public int Span() {
-            return lastIndex_ - firstIndex_;
-        }
-
-        public String toString() {
-            String temp = "";
-            for(int i = firstIndex_; i <= lastIndex_; i++) {
-                temp += tempDoc.wordAt(i).GetWord() + " ";
-            }
-
-            return temp;
-        }
-    }
-
-    // Represents a suffix. Used while building the suffix tree.
-    public final class Suffix {
-        private Node origin_;
-        private int firstIndex_;
-        private int lastIndex_;
-
-        public Suffix() {}
-        public Suffix(Node origin, int first, int last) {
-            origin_ = origin;
-            firstIndex_ = first;
-            lastIndex_ = last;
-        }
-
-        public Node origin() { return origin_; }
-        public void setOrigin(Node value) { origin_ = value; }
-
-        public int firstIndex() { return firstIndex_; }
-        public void setFirstIndex(int value) { firstIndex_ = value; }
-
-        public int LastIndex() { return lastIndex_; }
-        public void SetLastIndex(int value) { lastIndex_ = value; }
-
-        public boolean isExplicit() {
-            return firstIndex_ > lastIndex_;
-        }
-
-        public boolean isImplicit() {
-            return firstIndex_ <= lastIndex_;
-        }
-
-        public int span() {
-            return lastIndex_ - firstIndex_;
-        }
-    }
+    public Node root;
 
     private Suffix activePoint;
-    private Node root_;
     private int phrases;
-    private Article tempDoc;
+    private Article tempArticle;
 
     public SuffixTree() {
-        root_ = new Node();
-        tempDoc = new Article();
+        root = new Node();
+        tempArticle = new Article();
     }
 
-    public void addSentence(Article article, int start, int end) {
+    public void addSentence(Phrase phrase, Article article) {
         if(phrases == 0) {
-            activePoint = new Suffix(root_, 0, -1);
+            activePoint = new Suffix(root, 0, -1);
         }
 
-        // Add the sentence (it is presumed that it includes the terminator).
-        int oldCount = tempDoc.wordCount();
-
-        for(int i = start; i < end; i++) {
-            tempDoc.addWord(article.wordAt(i));
-            addWord(tempDoc.wordCount() - 1, article, oldCount + (end - start));
+        for(Word word : phrase.words) {
+            tempArticle.addWord(word);
+            addWord(word, article, phrase.startIndex, phrase.endIndex);
         }
 
         phrases++;
@@ -188,14 +74,14 @@ public final class SuffixTree {
         ArrayList<Edge> edges = new ArrayList<Edge>();
 
         // Search the clusters on all edges originating from the root.
-        Iterator<Edge> edgeIt = root_.Edges();
+        Iterator<Edge> edgeIt = root.edges();
 
         while(edgeIt.hasNext()) {
             Edge edge = edgeIt.next();
             edges.add(edge);
 
-            if(!edge.NextNode().IsLeaf()) {
-                getBaseClustersImpl(edge.NextNode(), clusters, edges, minWeight);
+            if(!edge.nextNode().isLeaf()) {
+                getBaseClustersImpl(edge.nextNode(), clusters, edges, minWeight);
             }
 
             edges.remove(edges.size() - 1);
@@ -204,14 +90,9 @@ public final class SuffixTree {
         return clusters;
     }
 
-    public Node root() {
-    	return root_;
-    }
-
-    private void addWord(int wordIndex, Article document, int maxIndex) {
+    private void addWord(Word word, Article article, int wordIndex, int maxIndex) {
         Node parent = null;
         Node lastParent = null; // Used to create links between the nodes.
-        Word word = tempDoc.wordAt(wordIndex);
 
         // An edge is added (if necessary) for all nodes found
         // between the active one and the last one. The active node
@@ -221,7 +102,8 @@ public final class SuffixTree {
         // (and the same for its successors, because they are suffixes for
         //  the end node and already have the required edges).
         while(true) {
-            parent = activePoint.origin();
+            parent = activePoint.origin;
+            if (parent == null) break;
 
             // If the node is explicit (already has edges) check if
             // an edge labeled with the current word must be added.
@@ -232,37 +114,36 @@ public final class SuffixTree {
             }
             else if(activePoint.isImplicit()) {
                 // The edge must be split before the word can be added.
-                Edge edge = parent.getEdge(tempDoc.wordAt(activePoint.firstIndex_));
+                Edge edge = parent.getEdge(tempArticle.wordAt(activePoint.firstIndex));
 
-                if(tempDoc.wordAt(edge.firstIndex() + activePoint.span() + 1).equals(word)) {
+                if(tempArticle.wordAt(edge.firstIndex() + activePoint.span() + 1).equals(word)) {
                     // The word is already in the right place.
                     break;
                 }
 
-                parent = splitEdge(edge, activePoint, document);
+                parent = splitEdge(edge, activePoint, article);
             }
 
             // The edge could not be found, it must be created now.
             // At the same time, the new node must be connected to the last visited one.
             Node newNode = new Node();
-            Edge newEdge = new Edge(document, wordIndex, maxIndex - 1,
-                                    parent, newNode);
+            Edge newEdge = new Edge(article, wordIndex, maxIndex - 1, parent, newNode);
             parent.addEdge(word, newEdge);
 
-            if((lastParent != null) && (lastParent != root_)) {
+            if((lastParent != null) && (lastParent != root)) {
                 lastParent.setSuffixNode(parent);
             }
             lastParent = parent;
 
             // Figure out the next suffix.
-            if(activePoint.origin() == root_) {
+            if(activePoint.origin == root) {
                 // If the active node is the root of the tree
                 // the next suffix follows the natural order.
-                activePoint.setFirstIndex(activePoint.firstIndex() + 1);
+                activePoint.firstIndex = activePoint.firstIndex + 1;
             }
             else {
                 // For internal nodes a link is used.
-                activePoint.setOrigin(activePoint.origin().suffixNode());
+                activePoint.origin = activePoint.origin.suffixNode();
             }
 
             // The suffix must be adjusted at each update.
@@ -270,12 +151,12 @@ public final class SuffixTree {
         }
 
         // Connect the last node to its parent.
-        if((lastParent != null) && (lastParent != root_)) {
+        if((lastParent != null) && (lastParent != root)) {
             lastParent.setSuffixNode(parent);
         }
 
         // The end point becomes the active point for the next step.
-        activePoint.SetLastIndex(activePoint.LastIndex() + 1);
+        activePoint.lastIndex = activePoint.lastIndex + 1;
         makeCanonic(activePoint);
     }
 
@@ -283,35 +164,35 @@ public final class SuffixTree {
         Node newNode = new Node();
         Edge newEdge = new Edge(document, edge.firstIndex(),
                                 edge.firstIndex() + suffix.span(),
-                                suffix.origin(), newNode);
+                                suffix.origin, newNode);
 
         // Replace the old edge with the new one.
-        suffix.origin().addEdge(tempDoc.wordAt(edge.firstIndex()), newEdge);
-        newNode.setSuffixNode(suffix.origin());
+        suffix.origin.addEdge(tempArticle.wordAt(edge.firstIndex()), newEdge);
+        newNode.setSuffixNode(suffix.origin);
 
         // Adjust the new edge (the associated node remains a leaf).
         edge.setFirstIndex(edge.firstIndex() + suffix.span() + 1);
         edge.setPreviousNode(newNode);
-        newNode.addEdge(tempDoc.wordAt(edge.firstIndex()), edge);
+        newNode.addEdge(tempArticle.wordAt(edge.firstIndex()), edge);
         return newNode;
     }
 
     private void makeCanonic(Suffix suffix) {
-        if(suffix.isExplicit()) {
+        if(suffix.isExplicit() || suffix.origin == null) {
             return;
         }
 
-        Word word = tempDoc.wordAt(suffix.firstIndex());
-        Edge edge = suffix.origin().getEdge(word);
+        Word word = tempArticle.wordAt(suffix.firstIndex);
+        Edge edge = suffix.origin.getEdge(word);
 
-        while(edge.Span() <= suffix.span()) {
-            suffix.setFirstIndex(suffix.firstIndex() + edge.Span() + 1);
-            suffix.setOrigin(edge.NextNode());
+        while(edge.span() <= suffix.span()) {
+            suffix.firstIndex = suffix.firstIndex + edge.span() + 1;
+            suffix.origin = edge.nextNode();
 
-            if(suffix.firstIndex() <= suffix.LastIndex()) {
+            if(suffix.firstIndex <= suffix.lastIndex) {
                 // Search can continue at the next level.
-                word = tempDoc.wordAt(suffix.firstIndex_);
-                edge = suffix.origin().getEdge(word);
+                word = tempArticle.wordAt(suffix.firstIndex);
+                edge = suffix.origin.getEdge(word);
             }
         }
     }
@@ -320,10 +201,10 @@ public final class SuffixTree {
         Phrase phrase = new Phrase();
 
         for(int i = 0; i < edges.size(); i++) {
-            SuffixTree.Edge edge = edges.get(i);
+            Edge edge = edges.get(i);
 
             for(int j = edge.firstIndex(); j <= edge.LastIndex(); j++) {
-                phrase.words.add(tempDoc.wordAt(j));
+                phrase.words.add(tempArticle.wordAt(j));
             }
         }
 
@@ -334,16 +215,16 @@ public final class SuffixTree {
     		List<Edge> edges, double minWeight) {
         // Create a new cluster and set the associated sentence.
         Cluster cluster = new Cluster(makePhrase(edges));
-        Iterator<Edge> edgeIt = node.Edges();
+        Iterator<Edge> edgeIt = node.edges();
 
         while(edgeIt.hasNext()) {
             Edge edge = edgeIt.next();
-            Node nextNode = edge.NextNode();
+            Node nextNode = edge.nextNode();
 
-            if(nextNode.IsLeaf()) {
+            if(nextNode.isLeaf()) {
                 // Add the document to the cluster.
-                if(!cluster.Articles().contains(edge.Article())) {
-                    cluster.Articles().add(edge.Article());
+                if(!cluster.Articles().contains(edge.article())) {
+                    cluster.Articles().add(edge.article());
                 }
             }
             else {

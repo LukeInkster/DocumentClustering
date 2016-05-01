@@ -30,41 +30,38 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package suffixTree;
-import java.util.ArrayList;
+package suffixTreeClusterer;
+
 import java.util.List;
+import java.util.Set;
 
-public final class Phrase {
-    public final List<Word> words;
+import main.Article;
+import main.Phrase;
+import suffixTree.SuffixTree;
 
-    public Phrase() {
-    	this.words = new ArrayList<Word>();
-    }
+public final class ArticleSet {
+	private List<Article> articles;
+	private SuffixTree tree = new SuffixTree();
 
-    public Phrase(List<Word> words) {
-    	this.words = words;
-    }
+	public ArticleSet(List<Article> articles){
+		this.articles = articles;
 
-    public double Weight() {
-        double sum = 0;
-        int count = words.size();
+		for (Article article : articles){
+			for (Phrase phrase : article.phrases()){
+				tree.addSentence(phrase, article);
+			}
+		}
+	}
 
-        for(int i = 0; i < count; i++) {
-            sum += words.get(i).tfidf;
-        }
+	public Set<Cluster> baseClusters(double minWeight) {
+		return tree.baseClusters(minWeight);
+	}
 
-        return sum;
-    }
+	public List<Article> articles() {
+		return articles;
+	}
 
-    @Override
-    public String toString() {
-    	StringBuilder sb = new StringBuilder();
-
-        for(Word word : words) {
-            sb.append(word.GetWord());
-            sb.append(" ");
-        }
-
-        return sb.toString();
-    }
+	public SuffixTree tree() {
+		return tree;
+	}
 }

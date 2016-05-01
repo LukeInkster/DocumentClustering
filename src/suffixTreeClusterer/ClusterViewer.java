@@ -30,7 +30,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package suffixTree;
+package suffixTreeClusterer;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -42,6 +42,9 @@ import java.util.Iterator;
 
 import javax.swing.JPanel;
 
+import suffixTree.Edge;
+import suffixTree.Node;
+
 public class ClusterViewer extends JPanel {
 
 	private static final long serialVersionUID = -4608038380647431251L;
@@ -50,7 +53,7 @@ public class ClusterViewer extends JPanel {
         public int Width;
         public int X;
         public int Y;
-        public SuffixTree.Node Node;
+        public Node Node;
         public Color Color;
         public ArrayList<NodeInfo> Children;
         public String Text;
@@ -79,16 +82,16 @@ public class ClusterViewer extends JPanel {
     private NodeInfo root;
 
 
-    public ClusterViewer(SuffixTree.Node root) {
+    public ClusterViewer(Node root) {
         LayoutNodes(root, 0);
     }
 
-    private NodeInfo LayoutNodes(SuffixTree.Node node, int level) {
+    private NodeInfo LayoutNodes(Node node, int level) {
         NodeInfo nodeInfo = new NodeInfo();
         nodeInfo.Node = node;
         nodeInfo.Color = COLORS[level];
 
-        if(node.IsLeaf()) {
+        if(node.isLeaf()) {
             nodeInfo.Color = LEAF_COLOR;
         }
 
@@ -97,14 +100,14 @@ public class ClusterViewer extends JPanel {
         }
 
         int width = 0;
-        Iterator<SuffixTree.Edge> edgeIt = node.Edges();
-        
+        Iterator<Edge> edgeIt = node.edges();
+
         while(edgeIt.hasNext()) {
-            SuffixTree.Edge edge = edgeIt.next();
-            NodeInfo child = LayoutNodes(edge.NextNode(), level + 1);
+            Edge edge = edgeIt.next();
+            NodeInfo child = LayoutNodes(edge.nextNode(), level + 1);
             nodeInfo.Children.add(child);
-            
-            if(edge.NextNode().IsLeaf()) {
+
+            if(edge.nextNode().isLeaf()) {
                 width += SIZE;
             }
             else {
@@ -115,16 +118,16 @@ public class ClusterViewer extends JPanel {
             child.Text = edge.toString();
         }
 
-        nodeInfo.Width = node.IsLeaf() ? SIZE : width / 2;
+        nodeInfo.Width = node.isLeaf() ? SIZE : width / 2;
         int x = SIZE / 2;
-        
+
         for(int i = 0; i < nodeInfo.Children.size(); i++) {
             NodeInfo child = nodeInfo.Children.get(i);
             child.Y = SIZE;
             child.X = x - (width / 2) + child.Width / 2;
             x += child.Width + X_DISTANCE;
         }
-        
+
         return nodeInfo;
     }
 
@@ -134,7 +137,7 @@ public class ClusterViewer extends JPanel {
             NodeInfo child = node.Children.get(i);
             int childX = nodeX + child.X;
             int childY = nodeY + child.Y + Y_DISTANCE;
-            
+
             g.drawLine(nodeX, nodeY, childX, childY);
             DrawNodes(child, childX, childY, g);
         }
@@ -152,7 +155,7 @@ public class ClusterViewer extends JPanel {
             int middleX = (int)(nodeX +(childX - nodeX) * 0.5);
             int middleY = (int)(nodeY +(childY - nodeY) * 0.5);
             double angle = Math.atan2(childY - nodeY, childX - nodeX);
-            
+
             if(Math.abs(angle) > 1.68) {
                 middleY = (int)(nodeY +(childY - nodeY) * 0.5);
                 angle += Math.PI;

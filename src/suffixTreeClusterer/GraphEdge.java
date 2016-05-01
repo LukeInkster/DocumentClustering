@@ -1,6 +1,6 @@
-package suffixTree;
+package suffixTreeClusterer;
 
-import suffixTree.AbstractOverlappingClusterMerger.GraphVertex;
+import suffixTreeClusterer.AbstractOverlappingClusterMerger.GraphVertex;
 
 /**
  * Represents an edge in a weighted graph. An unweighted edge

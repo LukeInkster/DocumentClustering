@@ -30,27 +30,42 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package suffixTree;
+package main;
 
-public interface DocumentSource {
-	/**
-	 * Whether or not this document source has another document.
-	 */
-    boolean hasArticle();
+public final class Word {
+	public final String word;
+	public double tfidf;
 
-    /**
-     * Whether or not this document source has another sentence.
-     */
-    boolean hasSentence();
+	public Word(String word, double tfidf) {
+		this.word = word;
+		this.tfidf = tfidf;
+	}
 
-    /**
-     * Whether or not this document source has another word.
-     */
-    boolean hasWord();
+	public Word(String word) {
+		this.word = word;
+	}
 
-    /**
-     * Returns the next word in the current sentence.
-     * @return the next word.
-     */
-    String nextWord();
+	public String GetWord() {
+		return word;
+	}
+
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+
+		Word other = (Word) obj;
+		return other.word.equals(word);
+	}
+
+	public int hashCode() {
+		return word.hashCode();
+	}
+
+	public String toString() {
+		return word + ", W=" + Double.toString(tfidf);
+	}
 }

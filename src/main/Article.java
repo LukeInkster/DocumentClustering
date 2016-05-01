@@ -1,5 +1,6 @@
 package main;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,13 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.management.RuntimeErrorException;
 
 import cleaning.Cleaner;
 import kMeans.Cluster;
 import kMeans.CosineSimilarity;
 import kMeans.Tfidf;
-import suffixTree.Phrase;
-import suffixTree.Word;
+import suffixTree.SuffixTree;
 
 public class Article {
 
@@ -26,11 +29,13 @@ public class Article {
 	public final Set<String> orgs;
 	public final Set<String> exchanges;
 
+	public Tfidf tfidf;
+
 	private List<String> words;
+	private List<Word> suffixTreeWords;
 	private List<Phrase> phrases;
 	private Set<String> distinctWords;
 	private Map<String, Integer> tf;
-	public Tfidf tfidf;
 
 	public Article(){
 		title = "";
@@ -41,6 +46,8 @@ public class Article {
 		people = new HashSet<String>();
 		orgs = new HashSet<String>();
 		exchanges = new HashSet<String>();
+		words = new ArrayList<String>();
+		suffixTreeWords = new ArrayList<Word>();
 	}
 
 	public Article(String title, String body, Date date, Set<String> topics,
@@ -101,10 +108,13 @@ public class Article {
 	}
 
 	public List<Word> toWordObjects(){
-		return bodyWords()
-				.stream()
-				.map(word -> new Word(word, tfidf(word)))
-				.collect(Collectors.toList());
+		//if (suffixTreeWords == null){
+//			suffixTreeWords = phrases()
+//					.stream()
+//					.flatMap(p -> p.words.stream())
+//					.collect(Collectors.toList());
+		//}
+		return suffixTreeWords;
 	}
 
 	public Word wordAt(int index){
@@ -113,19 +123,33 @@ public class Article {
 
 	public void addWord(Word word) {
 		words.add(word.word);
+		suffixTreeWords.add(word);
 	}
 
 	private List<Phrase> phrases(String s) {
-		return Cleaner.cleanAndSplitToSentences(s)
+		//if (tfidf == null) throw new RuntimeException("Call tfidf(idf) first");
+
+		List<Phrase> phrases = Cleaner.cleanAndSplitToSentences(s)
 				.stream()
 				.map(list -> phrases(list))
 				.collect(Collectors.toList());
+
+		int startIndex = 0;
+		for (Phrase p : phrases){
+			p.startIndex = startIndex;
+			p.endIndex = startIndex + p.size();
+			startIndex += p.size();
+		}
+
+		return phrases;
 	}
 
 	private Phrase phrases(List<String> list) {
-		return new Phrase(list
-				.stream()
-				.map(word -> new Word(word, tfidf(word)))
+		return new Phrase(
+				Stream.concat(list
+					.stream()
+					.map(word -> new Word(word, tfidf == null ? 0 : tfidf(word))),
+					Stream.of(Phrase.endMarker()))
 				.collect(Collectors.toList())
 			);
 	}

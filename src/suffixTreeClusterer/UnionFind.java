@@ -1,4 +1,4 @@
-package suffixTree;
+package suffixTreeClusterer;
 
 /**Compilation:  javac UF.java
  *  Execution:    java UF < input.txt
@@ -92,7 +92,7 @@ package suffixTree;
  * @author Kevin Wayne
  */
 
-public class UF {
+public class UnionFind {
 
 	private int[] parent; // parent[i] = parent of i
 	private byte[] rank; // rank[i] = rank of subtree rooted at i (never more than 31)
@@ -108,7 +108,7 @@ public class UF {
 	 * @throws IllegalArgumentException
 	 *             if <tt>N &lt; 0</tt>
 	 */
-	public UF(int N) {
+	public UnionFind(int N) {
 		if (N < 0)
 			throw new IllegalArgumentException();
 		count = N;

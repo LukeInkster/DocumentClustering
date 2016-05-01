@@ -30,7 +30,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package suffixTree;
+package suffixTreeClusterer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,15 +38,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import main.Article;
+import suffixTree.Node;
+
 public final class ClusterFinder {
 
-	private static DocumentReader reader;
+	private static ArticleSet articleSet;
 
 	// Function used for unit tests.
-	public static SuffixTree.Node ParseSource(DocumentSource source) {
-		DocumentReader reader = new DocumentReader(source);
-		reader.read();
-		return reader.tree().root();
+	public static Node ParseSource(List<Article> articles) {
+		ArticleSet reader = new ArticleSet(articles);
+		return reader.tree().root;
 	}
 
 	/**
@@ -65,21 +67,17 @@ public final class ClusterFinder {
 	 *            The minimum weight of a cluster to be considered.
 	 * @return A list with all clusters meeting the specified conditions.
 	 */
-	public static Set<Cluster> Find(DocumentSource source, int maxClusters,
+	public static Set<Cluster> Find(List<Article> articles, int maxClusters,
 			double minClusterWeight, IClusterMerger merger) {
-		assert(source != null);
-		assert(maxClusters > 0);
-		// ------------------------------------------------
 		// Read all documents and get the base clusters.
 		// The weight of each one is computed and is used to sort them
 		// in ascending order. The first maxClusters clusters are created by
 		// merging base clusters. Any base clusters that haven't been merged
 		// into a cluster are merged into an aggregate final cluster labeled
 		// 'Other'.
-		reader = new DocumentReader(source);
-		reader.read();
+		articleSet = new ArticleSet(articles);
 
-		Set<Cluster> baseClusterSet = reader.baseClusters(minClusterWeight);
+		Set<Cluster> baseClusterSet = articleSet.baseClusters(minClusterWeight);
 
 		if (baseClusterSet.isEmpty()) {
 			System.out.println("No base clusters were found, this indicates an error in the program.");
@@ -93,7 +91,7 @@ public final class ClusterFinder {
 		int limit = Math.min(maxClusters, baseClusterList.size());
 
 		baseClusterSet.clear();
-		baseClusterSet.addAll(baseClusterList.subList(0, limit));		
+		baseClusterSet.addAll(baseClusterList.subList(0, limit));
 		Set<Cluster> finalClusters = merger.MergeClusters(baseClusterSet);
 
 		if (limit < baseClusterSet.size()) {
@@ -106,7 +104,7 @@ public final class ClusterFinder {
 		return finalClusters;
 	}
 
-	public static DocumentReader getReader() {
-		return reader;
+	public static ArticleSet getReader() {
+		return articleSet;
 	}
 }

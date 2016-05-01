@@ -10,15 +10,13 @@ import java.util.stream.Collectors;
 import kMeans.Cluster;
 import kMeans.CosineSimilarity;
 import kMeans.KMeans;
+import suffixTreeClusterer.ArticleSet;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 
 		List<Article> articles = new Parser(new File("data")).parse();
-
-		System.out.println(articles.get(0).phrases().stream().map(s -> s + "\n").collect(Collectors.toList()));
-		System.out.println(articles.get(0).body);
 
 		System.out.println("Finished reading " + articles.size() + " articles in "
 				+ (System.currentTimeMillis() - start) + "ms");
@@ -33,6 +31,14 @@ public class Main {
 		for (Article a:articles){
 			a.tfidf(idf);
 		}
+
+		ArticleSet articleSet = new ArticleSet(articles);
+		System.out.println(articleSet.tree());
+
+		System.out.println(articles.get(0).phrases().stream().map(s -> s + "\n").collect(Collectors.toList()));
+		//System.out.println(articles.get(0).body);
+
+
 		//System.out.println(idf.keySet().stream().map(x -> x + "\n").collect(Collectors.toList()));
 
 		//System.out.println(articles.get(0).bodyWords().stream().filter(x -> x.equals("cocoa")).count());
@@ -46,13 +52,14 @@ public class Main {
 
 		//System.out.println(Thesaurus.map.entrySet().stream().sorted((x,y) -> x.getValue().compareTo(y.getValue())).map(e -> e.getKey() + " -> " + e.getValue() + "\n").collect(Collectors.toList()));
 
-		System.out.println(articles
-				.subList(1, articles.size())
-				.stream()
-				.max((x,y) -> (int)(
-						(CosineSimilarity.of(articles.get(0).tfidf, x.tfidf) -
-						CosineSimilarity.of(articles.get(0).tfidf, y.tfidf)) * 1000000))
-				.get().body);
+		// MOST SIMILAR TO FIRST ARTICLE
+//		System.out.println(articles
+//				.subList(1, articles.size())
+//				.stream()
+//				.max((x,y) -> (int)(
+//						(CosineSimilarity.of(articles.get(0).tfidf, x.tfidf) -
+//						CosineSimilarity.of(articles.get(0).tfidf, y.tfidf)) * 1000000))
+//				.get().body);
 
 		System.out.println(articles.stream().flatMap(x -> x.topics.stream()).distinct().collect(Collectors.toList()).size());
 		System.out.println(articles.stream().flatMap(x -> x.distinctWords().stream()).distinct().collect(Collectors.toList()).size());
@@ -83,20 +90,20 @@ public class Main {
 	}
 
 	private static Map<String, Double> idf(List<Article> articles) {
-		Map<String, Double> df = new HashMap<String, Double>();
+		Map<String, Double> idf = new HashMap<String, Double>();
 
 		articles
 			.stream()
 			.map(a -> a.tf())
 			.forEach(tf -> {
 				tf.forEach((k, v) -> {
-					if (df.containsKey(k)) df.put(k, df.get(k) + 1.0);
-					else df.put(k, 1.0);
+					if (idf.containsKey(k)) idf.put(k, idf.get(k) + 1.0);
+					else idf.put(k, 1.0);
 				});
 			});
 
-		df.forEach((k,v) -> df.put(k, Math.log(((double)articles.size())/v)));
+		idf.forEach((k,v) -> idf.put(k, Math.log(((double)articles.size())/v)));
 
-		return df;
+		return idf;
 	}
 }

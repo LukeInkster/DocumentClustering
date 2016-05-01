@@ -1,4 +1,4 @@
-package suffixTree;
+package suffixTreeClusterer;
 
 import java.util.Set;
 

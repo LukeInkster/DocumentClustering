@@ -1,4 +1,4 @@
-package suffixTree;
+package suffixTreeClusterer;
 
 import java.io.File;
 import java.util.ArrayDeque;
@@ -7,14 +7,14 @@ import java.util.Set;
 
 /**
  * Driver code for the Suffix Tree (ST) clustering system.
- * 
+ *
  * @author harryross - harryross263@gmail.com.
  */
 public class SuffixTreeClustering {
 
 	/**
 	 * Takes the filenames of the documents to be clustered as arguments.
-	 * 
+	 *
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -31,13 +31,10 @@ public class SuffixTreeClustering {
 			mstFiles.add(new File(s));
 		}
 
-		DocumentSource minDegreeSource = new ReutersSource(minDegreeFiles);
-		DocumentSource mstSource = new ReutersSource(mstFiles);
-		
-		Set<Cluster> minDegreeClusters = ClusterFinder.Find(minDegreeSource, Integer.MAX_VALUE, 0, new MinDegreeClusterMerger(0.99));
-		Set<Cluster> mstClusters = ClusterFinder.Find(mstSource, Integer.MAX_VALUE, 0.0, new MSTMerger(10));
-
-		System.out.println("Number of clusters found using minDegree: " + minDegreeClusters.size());
-		System.out.println("Number of clusters found using MST: " + mstClusters.size());
+//		DocumentSource minDegreeSource = new ReutersSource(minDegreeFiles);
+//
+//		Set<Cluster> minDegreeClusters = ClusterFinder.Find(minDegreeSource, Integer.MAX_VALUE, 0, new MinDegreeClusterMerger(0.99));
+//
+//		System.out.println("Number of clusters found using minDegree: " + minDegreeClusters.size());
 	}
 }

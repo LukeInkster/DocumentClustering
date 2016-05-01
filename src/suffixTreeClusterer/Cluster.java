@@ -30,7 +30,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package suffixTree;
+package suffixTreeClusterer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Set;
 
 import main.Article;
+import main.Phrase;
 
 public final class Cluster implements Comparable<Cluster> {
 	private List<Article> articles;

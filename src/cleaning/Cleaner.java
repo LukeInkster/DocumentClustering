@@ -17,6 +17,7 @@ public class Cleaner {
 				.replace("-", " ")
 				.replace(",", " ")
 				.replace(".", " ")
+				.replace("/", " ")
 				.replaceAll(notWordAndNotWhitespace, "")
 				.toLowerCase()
 				.split(notWord)
@@ -39,6 +40,7 @@ public class Cleaner {
 
 	public static List<List<String>> cleanAndSplitToSentences(String s) {
 		return Arrays.stream(s
+				.replace("U.S.", "US")
 				.replaceAll("[0-9+]\\.[0-9+]", "")
 				.split("\\.")
 			)

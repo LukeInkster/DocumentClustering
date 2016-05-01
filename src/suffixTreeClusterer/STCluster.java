@@ -86,11 +86,8 @@ public final class STCluster implements Comparable<STCluster> {
 		return (dist_forward + dist_backward) / 2.0 ;
 	}
 
-	// Unifies all clusters from the specified list
-	// into a single cluster containing the union of the documents.
+	// Joins clusters from the set into one cluster containing the union of the articles
 	public static STCluster merge(Set<STCluster> clusters) {
-		assert(clusters != null);
-
 		STCluster newCluster = new STCluster(clusters.size() * 2, clusters.size());
 		Set<Article> allArticles = new HashSet<>();
 

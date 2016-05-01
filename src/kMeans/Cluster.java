@@ -1,4 +1,4 @@
-package clustering;
+package kMeans;
 
 import java.util.ArrayList;
 import java.util.Arrays;

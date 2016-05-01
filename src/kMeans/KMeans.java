@@ -1,4 +1,4 @@
-package clustering;
+package kMeans;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ public class KMeans {
 			clusters.add(new Cluster(articles.get((int)(Math.random() * articles.size()))));
 		}
 
-		for (int i = 0; i < 5; i++){
+		for (int i = 0; i < 15; i++){
 			long start = System.currentTimeMillis();
 			clusters = recalculateClusters(clusters, articles);
 			clusters = restartDeadClusters(clusters, articles);

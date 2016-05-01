@@ -1,4 +1,4 @@
-package clustering;
+package kMeans;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +10,7 @@ public class CosineSimilarity {
 	}
 
 	private static double sumProducts(Tfidf a, Tfidf b) {
-		return unionWords(a, b).stream()
+		return intersectionWords(a, b).stream()
 				.mapToDouble(x -> a.get(x) * b.get(x)).sum();
 	}
 
@@ -18,10 +18,9 @@ public class CosineSimilarity {
 		return tfidf.vecLen();
 	}
 
-	private static Set<String> unionWords(Tfidf a, Tfidf b) {
-		Set<String> words = new HashSet<String>();
-		words.addAll(a.words());
-		words.addAll(b.words());
+	private static Set<String> intersectionWords(Tfidf a, Tfidf b) {
+		Set<String> words = new HashSet<String>(a.words());
+		words.retainAll(b.words());
 		return words;
 	}
 }

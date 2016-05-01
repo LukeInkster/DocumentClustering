@@ -23,8 +23,8 @@ public class Cleaner {
 			)
 			.filter(Cleaner::isNotNumber)
 			.filter(Cleaner::isNotEmptyOrWhitespace)
+//			.map(Thesaurus::map)
 			.map(Stemmer::stem)
-			.map(Thesaurus::map)
 			.filter(StopWords::isSafe)
 			.collect(Collectors.toList());
 	}
@@ -35,5 +35,15 @@ public class Cleaner {
 
 	public static boolean isNotEmptyOrWhitespace(String s){
 		return !s.matches("\\s*");
+	}
+
+	public static List<List<String>> cleanAndSplitToSentences(String s) {
+		return Arrays.stream(s
+				.replaceAll("[0-9+]\\.[0-9+]", "")
+				.split("\\.")
+			)
+			.map(x -> cleanAndSplit(x))
+			.filter(x -> !x.isEmpty())
+			.collect(Collectors.toList());
 	}
 }

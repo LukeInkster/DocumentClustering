@@ -44,8 +44,8 @@ public class Parser {
 			.map(Parser::toBufferedReader)
 			.flatMap(this::splitFile)
 			.map(this::parseArticle)
-			.filter(a -> !a.topics.isEmpty())
-			.filter(a -> !a.bodyWords().isEmpty())
+			.filter(a -> !a.topics.isEmpty()) // So topics can be used to measure purity
+			.filter(a -> !a.bodyWords().isEmpty()) // Ignore empty articles
 			.collect(Collectors.toList());
 	}
 

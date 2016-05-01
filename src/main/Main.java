@@ -7,16 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import clustering.Cluster;
-import clustering.CosineSimilarity;
-import clustering.KMeans;
+import kMeans.Cluster;
+import kMeans.CosineSimilarity;
+import kMeans.KMeans;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 
-		File data = new File("data");
-		List<Article> articles = new Parser(data).parse().subList(0, 5000);
+		List<Article> articles = new Parser(new File("data")).parse();
+
+		System.out.println(articles.get(0).phrases().stream().map(s -> s + "\n").collect(Collectors.toList()));
+		System.out.println(articles.get(0).body);
 
 		System.out.println("Finished reading " + articles.size() + " articles in "
 				+ (System.currentTimeMillis() - start) + "ms");

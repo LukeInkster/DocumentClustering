@@ -43,7 +43,8 @@ public class Thesaurus {
 				);
 
 		entries.forEach(e -> {
-			map.put(e.getKey(), e.getValue());
+			if (!map.containsKey(e.getKey()))
+				map.put(e.getKey(), e.getValue());
 		});
 		return map;
 	}

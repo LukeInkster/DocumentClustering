@@ -1,4 +1,4 @@
-package clustering;
+package kMeans;
 
 import java.util.Collection;
 import java.util.HashMap;

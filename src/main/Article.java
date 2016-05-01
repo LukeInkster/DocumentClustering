@@ -6,11 +6,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import cleaning.Cleaner;
-import clustering.Cluster;
-import clustering.CosineSimilarity;
-import clustering.Tfidf;
+import kMeans.Cluster;
+import kMeans.CosineSimilarity;
+import kMeans.Tfidf;
+import suffixTree.Phrase;
+import suffixTree.Word;
 
 public class Article {
 
@@ -24,9 +27,21 @@ public class Article {
 	public final Set<String> exchanges;
 
 	private List<String> words;
+	private List<Phrase> phrases;
 	private Set<String> distinctWords;
 	private Map<String, Integer> tf;
 	public Tfidf tfidf;
+
+	public Article(){
+		title = "";
+		body = "";
+		date = new Date();
+		topics = new HashSet<String>();
+		places = new HashSet<String>();
+		people = new HashSet<String>();
+		orgs = new HashSet<String>();
+		exchanges = new HashSet<String>();
+	}
 
 	public Article(String title, String body, Date date, Set<String> topics,
 			Set<String> places, Set<String> people, Set<String> orgs, Set<String> exchanges){
@@ -81,6 +96,40 @@ public class Article {
 		return words == null ? words = toWords(body) : words;
 	}
 
+	public List<Phrase> phrases(){
+		return phrases == null ? phrases = phrases(body) : phrases;
+	}
+
+	public List<Word> toWordObjects(){
+		return bodyWords()
+				.stream()
+				.map(word -> new Word(word, tfidf(word)))
+				.collect(Collectors.toList());
+	}
+
+	public Word wordAt(int index){
+		return toWordObjects().get(index);
+	}
+
+	public void addWord(Word word) {
+		words.add(word.word);
+	}
+
+	private List<Phrase> phrases(String s) {
+		return Cleaner.cleanAndSplitToSentences(s)
+				.stream()
+				.map(list -> phrases(list))
+				.collect(Collectors.toList());
+	}
+
+	private Phrase phrases(List<String> list) {
+		return new Phrase(list
+				.stream()
+				.map(word -> new Word(word, tfidf(word)))
+				.collect(Collectors.toList())
+			);
+	}
+
 	private static List<String> toWords(String s){
 		return Cleaner.cleanAndSplit(s);
 	}
@@ -88,6 +137,18 @@ public class Article {
 	public Set<String> distinctWords() {
 		if (distinctWords == null) tf();
 		return distinctWords;
+	}
+
+	public boolean contains(String word){
+		return distinctWords.contains(word);
+	}
+
+	public boolean contains(Word word){
+		return distinctWords.contains(word.word);
+	}
+
+	public int wordCount(){
+		return bodyWords().size();
 	}
 
 	public double cosineSimilarityTo(Article other){

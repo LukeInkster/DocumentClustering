@@ -46,7 +46,17 @@ public final class Node {
         return isLeaf() ? "Leaf" : "Edges: " + edges.size();
     }
 
+    public void print(){
+    	print("");
+    }
+
+    public void print(String indent){
+    	for (Edge e : edges.values()){
+    		e.print(indent + "  ");
+    	}
+    }
+
     public int size(){
-    	return isLeaf() ? 1 : 1 + edges.values().stream().mapToInt(edge -> edge.parent.size()).sum();
+    	return isLeaf() ? 1 : 1;// + edges.values().stream().mapToInt(edge -> edge.child.size()).sum();
     }
 }

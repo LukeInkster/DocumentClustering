@@ -10,13 +10,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.management.RuntimeErrorException;
-
 import cleaning.Cleaner;
 import kMeans.Cluster;
 import kMeans.CosineSimilarity;
 import kMeans.Tfidf;
-import suffixTree.SuffixTree;
 
 public class Article {
 

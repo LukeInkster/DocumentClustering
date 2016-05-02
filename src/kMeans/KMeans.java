@@ -13,10 +13,11 @@ public class KMeans {
 			clusters.add(new Cluster(articles.get((int)(Math.random() * articles.size()))));
 		}
 
-		for (int i = 0; i < 15; i++){
+		int numIterations = 15;
+		for (int i = 0; i < numIterations; i++){
 			long start = System.currentTimeMillis();
 			clusters = recalculateClusters(clusters, articles);
-			clusters = restartDeadClusters(clusters, articles);
+			if (i < numIterations - 2) clusters = restartDeadClusters(clusters, articles);
 			System.out.println("KMeans iteration " + i + " completed in " +
 					(System.currentTimeMillis() - start) + " ms");
 		}

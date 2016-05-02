@@ -31,51 +31,21 @@ public final class SuffixTree {
             activePoint = new Suffix(root, 0, -1);
         }
 
+        int endOfPhrase = tempArticle.wordCount() + (phrase.endIndex - phrase.startIndex);
         for (Word word : phrase.words) {
             tempArticle.addWord(word);
-            addWord(word, article, phrase.startIndex, phrase.endIndex);
+            int wordIndex = tempArticle.wordCount() - 1;
+            addWord(wordIndex, article, endOfPhrase);
         }
 
         phrases.add(phrase);
     }
 
-    // Returns a set containing the base clusters with weight > minWeight.
-    public Set<STCluster> baseClusters(double minWeight) {
-        Set<STCluster> clusters =  new HashSet<STCluster>();
-        Stack<Edge> edges = new Stack<Edge>();
-
-        // Search the clusters on all edges from the root.
-        for (Edge edge : root.edges()){
-            edges.push(edge);
-
-            if(!edge.parent.isLeaf())
-            	getBaseClustersImpl(edge.parent, clusters, edges, minWeight);
-
-            edges.pop();
-        }
-
-        return clusters;
-    }
-
-    private void addWord(Word word, Article article, int wordIndex, int maxIndex) {
+    private void addWord(int wordIndex, Article article, int endOfPhraseIndex) {
         Node parent = null;
-        Node lastParent = null; // Used to create links between the nodes.
+        Node lastParent = null;
+        Word word = tempArticle.wordAt(wordIndex);
 
-        System.out.println(root.size() + " " + root.edges().size());
-        if (root.size() %100 == 0) {JFrame frame = new JFrame("Clustering");
-        junk.ClusterViewer viewer = new junk.ClusterViewer(root);
-
-        frame.setBackground(Color.WHITE);
-        viewer.setBackground(Color.WHITE);
-        frame.setSize(1024, 800);
-        frame.setContentPane(viewer);
-        frame.setVisible(true);
-
-        while(frame.isVisible()) {
-            try {
-                Thread.sleep(500);
-            } catch(InterruptedException ex) {}
-        }}
         // An edge is added (if necessary) for all nodes found between the active one and the
         // last one. The active node is the first node which is not a leaf (a leaf node will never
         // change its type again and will be ignored in the next steps). The end node is the first
@@ -102,10 +72,9 @@ public final class SuffixTree {
                 parent = splitEdge(edge, activePoint, article);
             }
 
-            // The edge could not be found, it must be created now.
-            // At the same time, the new node must be connected to the last visited one.
+            // The edge not found, create one.
             Node newNode = new Node();
-            Edge newEdge = new Edge(article, wordIndex, maxIndex - 1, parent, newNode);
+            Edge newEdge = new Edge(article, tempArticle, wordIndex, endOfPhraseIndex - 1, parent, newNode);
             parent.addEdge(word, newEdge);
 
             if((lastParent != null) && (lastParent != root)) {
@@ -113,11 +82,10 @@ public final class SuffixTree {
             }
             lastParent = parent;
 
-            // Figure out the next suffix.
+            // Find the next suffix.
             if(activePoint.origin == root) {
-                // If the active node is the root of the tree
-                // the next suffix follows the natural order.
-                activePoint.firstIndex += 1;
+                // If the active node is the root of the tree the next suffix follows the natural order.
+                activePoint.firstIndex++;
             }
             else {
                 // For internal nodes a link is used.
@@ -134,13 +102,31 @@ public final class SuffixTree {
         }
 
         // The end point becomes the active point for the next step.
-        activePoint.lastIndex = activePoint.lastIndex + 1;
+        activePoint.lastIndex++;
         makeCanonic(activePoint);
     }
 
-    private Node splitEdge(Edge edge, Suffix suffix, Article document) {
+    // Returns a set containing the base clusters with weight > minWeight.
+    public Set<STCluster> baseClusters(double minWeight) {
+        Set<STCluster> clusters =  new HashSet<STCluster>();
+        Stack<Edge> edges = new Stack<Edge>();
+
+        // Search the clusters on all edges from the root.
+        for (Edge edge : root.edges()){
+            edges.push(edge);
+
+            if(!edge.child.isLeaf())
+            	getBaseClustersImpl(edge.child, clusters, edges, minWeight);
+
+            edges.pop();
+        }
+
+        return clusters;
+    }
+
+    private Node splitEdge(Edge edge, Suffix suffix, Article article) {
         Node newNode = new Node();
-        Edge newEdge = new Edge(document, edge.firstIndex, edge.firstIndex + suffix.span(), suffix.origin, newNode);
+        Edge newEdge = new Edge(article, tempArticle, edge.firstIndex, edge.firstIndex + suffix.span(), suffix.origin, newNode);
 
         // Replace the old edge with the new one.
         suffix.origin.addEdge(tempArticle.wordAt(edge.firstIndex), newEdge);
@@ -148,7 +134,7 @@ public final class SuffixTree {
 
         // Adjust the new edge (the associated node remains a leaf).
         edge.firstIndex = edge.firstIndex + suffix.span() + 1;
-        edge.child = newNode;
+        edge.parent = newNode;
         newNode.addEdge(tempArticle.wordAt(edge.firstIndex), edge);
         return newNode;
     }
@@ -163,7 +149,7 @@ public final class SuffixTree {
 
         while(edge.span() <= suffix.span()) {
             suffix.firstIndex = suffix.firstIndex + edge.span() + 1;
-            suffix.origin = edge.parent;
+            suffix.origin = edge.child;
 
             if(suffix.firstIndex <= suffix.lastIndex) {
                 // Search can continue at the next level.
@@ -190,11 +176,11 @@ public final class SuffixTree {
         STCluster cluster = new STCluster(makePhrase(edges));
 
         for (Edge edge : node.edges()){
-            Node nextNode = edge.parent;
+            Node childNode = edge.child;
 
-            if(nextNode.isLeaf()) {
+            if (childNode.isLeaf()) {
                 // Add the document to the cluster.
-                if(!cluster.articles.contains(edge.article)) {
+                if (!cluster.articles.contains(edge.article)) {
                     cluster.articles.add(edge.article);
                 }
             }
@@ -202,11 +188,11 @@ public final class SuffixTree {
                 // The edge leads to an internal node. All documents that belong to the cluster
             	// associated with this internal node must be added to the current cluster.
                 edges.push(edge);
-                STCluster child = getBaseClustersImpl(nextNode, clusters, edges, minWeight);
+                STCluster child = getBaseClustersImpl(childNode, clusters, edges, minWeight);
                 edges.pop();
 
-                for(Article article : child.articles) {
-                    if(!cluster.articles.contains(article)) {
+                for (Article article : child.articles) {
+                    if (!cluster.articles.contains(article)) {
                         cluster.articles.add(article);
                     }
                 }

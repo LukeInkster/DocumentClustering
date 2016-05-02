@@ -1,6 +1,8 @@
 package cleaning;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
   * Stemmer, implementing the Porter Stemming Algorithm

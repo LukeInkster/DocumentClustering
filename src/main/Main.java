@@ -53,7 +53,7 @@ public class Main {
 				.stream()
 				.sorted((x,y) -> (int)((x.purity() - y.purity()) * 10000))
 				.collect(Collectors.toList())){
-			System.out.println("size: " + c.articles.size() + " purity: " + c.purity() + " topic:" + c.mostCommonTopic());
+			System.out.println("size: " + c.articles.size() + " purity: " + c.purity());
 		}
 		System.out.println("average purity: " + stClusters.stream().mapToDouble(x -> x.purity()).average().getAsDouble());
 		System.out.println("weighted average purity: " + weightedPurity(stClusters));

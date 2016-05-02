@@ -10,12 +10,10 @@ public final class Node {
     // The last node of the suffix obtained by considering all nodes from
 	// the root to it. It is the point where the next insertion must be made.
     public Node suffixNode;
-
-    // The edges to the child nodes.
     private HashMap<Word, Edge> edges;
 
     public Node() {
-        edges = new HashMap<Word, Edge>(4);
+        edges = new HashMap<Word, Edge>();
     }
 
     public List<Edge> edges() {

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import main.Article;
 import main.Phrase;
+import main.Purity;
 
 public final class STCluster implements Comparable<STCluster> {
 	public List<Article> articles;
@@ -27,32 +28,31 @@ public final class STCluster implements Comparable<STCluster> {
 		phrases.add(phrase);
 	}
 
-	// Computes the weight of the clusters based on the contained articles.
 	public double computeWeight() {
-		// The weight is equal to the product between the number of articles, the (adjusted) length of
-		// the sentences and the sum of the weight of each word's part of the sentences.
+		// Cluster weight is the product of:
+		// - the number of articles
+		// - the length of sentences
+		// - the sum of the weight of each word's part of the sentences.
 		double wordWeight = phrases.stream().mapToDouble(p -> p.weight()).sum();
 		return weight = articles.size() * phrasesWeight() * wordWeight;
 	}
 
-	/*
-	 * Returns the 'distance' between this cluster and another. The distance can
-	 * be thought of as the average similarity of the articles in the two clusters.
-	 * i.e. a measure of how overlapping the clusters are. If the two clusters are exactly
-	 * identical then the similarity would be 1. If there is no overlap then the distance would be 0.
+	/**
+	 * The similarity of two clusters is the proportion of each cluster's articles
+	 * which are also found in the other cluster
 	 */
-//	public double similarity(STCluster other) {
-//		Set<Article> articleSet = new HashSet<Article>(articles);
-//
-//		// Check which of the articles from the other cluster are found in this cluster.
-//		double common = other.articles.stream().filter(articleSet::contains).count();
-//
-//		double dist_forward = common / (double) articles.size();
-//		double dist_backward = common / (double) other.articles.size();
-//
-//		// Return the average distance between these two clusters.
-//		return (dist_forward + dist_backward) / 2.0 ;
-//	}
+	public double similarity(STCluster other) {
+		Set<Article> articleSet = new HashSet<Article>(articles);
+
+		// Check which of the articles from the other cluster are found in this cluster.
+		double common = other.articles.stream().filter(articleSet::contains).count();
+
+		double dist_forward = common / (double) articles.size();
+		double dist_backward = common / (double) other.articles.size();
+
+		// Return the average distance between these two clusters.
+		return (dist_forward + dist_backward) / 2.0 ;
+	}
 
 	// Joins clusters from the set into one cluster containing the union of the articles
 	public static STCluster merge(Set<STCluster> clusters) {
@@ -87,36 +87,14 @@ public final class STCluster implements Comparable<STCluster> {
 	}
 
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Cluster: " + label);
+		StringBuilder sb = new StringBuilder("Cluster: " + label);
 		sb.append("; Weight: " + weight);
 		sb.append("; Number docs: " + articles.size());
 		for (Phrase p : phrases) sb.append(p.toString());
 		return sb.toString();
 	}
 
-	public Optional<String> mostCommonTopic(){
-		List<String> allTopics = articles
-			.stream()
-			.flatMap(a -> a.topics.stream())
-			.collect(Collectors.toList());
-
-		return allTopics
-			.stream()
-			.max((x,y) ->
-				Collections.frequency(allTopics, x) -
-				Collections.frequency(allTopics, y));
-	}
-
-	/**
-	 * @return The proportion of articles that contain the most common topic in the cluster
-	 */
 	public double purity(){
-		Optional<String> mostCommon = mostCommonTopic();
-
-		if (!mostCommon.isPresent()) return 1;
-
-		return (double)articles.stream().filter(a -> a.topics.contains(mostCommon.get())).count() /
-				(double)articles.size();
+		return Purity.of(articles);
 	}
 }

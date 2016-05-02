@@ -1,12 +1,9 @@
 package suffixTreeClusterer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import main.Article;
 import main.Phrase;
@@ -54,19 +51,15 @@ public final class STCluster implements Comparable<STCluster> {
 		return (dist_forward + dist_backward) / 2.0 ;
 	}
 
-	// Joins clusters from the set into one cluster containing the union of the articles
 	public static STCluster merge(Set<STCluster> clusters) {
 		STCluster newCluster = new STCluster(clusters.size() * 2, clusters.size());
 		Set<Article> allArticles = new HashSet<>();
 
-		// Each article must appear a single time in the new cluster, as must
-		// each Phrase in each original cluster.
 		for (STCluster c : clusters) {
 			allArticles.addAll(c.articles);
 			newCluster.phrases.addAll(c.phrases);
 		}
 
-		// Add the articles to the new cluster.
 		newCluster.articles.addAll(allArticles);
 		return newCluster;
 	}

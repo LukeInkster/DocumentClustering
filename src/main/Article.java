@@ -124,8 +124,6 @@ public class Article {
 	}
 
 	private List<Phrase> phrases(String s) {
-		//if (tfidf == null) throw new RuntimeException("Call tfidf(idf) first");
-
 		List<Phrase> phrases = Cleaner.cleanAndSplitToSentences(s)
 				.stream()
 				.map(list -> phrases(list))
@@ -178,5 +176,31 @@ public class Article {
 
 	public double cosineSimilarityTo(Cluster cluster) {
 		return CosineSimilarity.of(tfidf, cluster.tfidf());
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((distinctWords == null) ? 0 : distinctWords.hashCode());
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		Article other = (Article) obj;
+		if (distinctWords == null) {
+			if (other.distinctWords != null)
+				return false;
+		} else if (!distinctWords.equals(other.distinctWords))
+			return false;
+		if (title == null) {
+			if (other.title != null)
+				return false;
+		} else if (!title.equals(other.title))
+			return false;
+		return true;
 	}
 }

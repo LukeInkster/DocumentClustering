@@ -2,21 +2,20 @@ package suffixTree;
 
 public final class Suffix {
 	public Node origin;
-    public int firstIndex;
-    public int lastIndex;
+    public int startIndex;
+    public int endIndex;
 
-    public Suffix(Node origin, int first, int last) {
+    public Suffix(Node origin, int startIndex, int endIndex) {
         this.origin = origin;
-        this.firstIndex = first;
-        this.lastIndex = last;
-        if (origin == null) throw new RuntimeException();
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
     }
 
     /**
      * @return True if the node represents an actual phrase end
      */
     public boolean isExplicit() {
-        return firstIndex > lastIndex;
+        return startIndex > endIndex;
     }
 
     /**
@@ -24,10 +23,10 @@ public final class Suffix {
      * representing an actual phrase end
      */
     public boolean isImplicit() {
-        return firstIndex <= lastIndex;
+        return startIndex <= endIndex;
     }
 
     public int span() {
-        return lastIndex - firstIndex;
+        return endIndex - startIndex;
     }
 }

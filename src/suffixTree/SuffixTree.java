@@ -16,11 +16,22 @@ public final class SuffixTree {
 
     private Suffix activePoint;
     private List<Phrase> phrases = new ArrayList<Phrase>();
-    public static Article tempArticle;
+    public List<Word> allWords;
 
     public SuffixTree() {
         root = new Node();
-        tempArticle = new Article();
+        allWords = new ArrayList<Word>();
+    }
+
+    public SuffixTree(List<Article> articles){
+        root = new Node();
+        allWords = new ArrayList<Word>();
+
+		for (Article article : articles){
+			for (Phrase phrase : article.phrases()){
+				addPhrase(phrase, article);
+			}
+		}
     }
 
     public void addPhrase(Phrase phrase, Article article) {
@@ -28,20 +39,20 @@ public final class SuffixTree {
             activePoint = new Suffix(root, 0, -1);
         }
 
-        int endOfPhrase = tempArticle.wordCount() + (phrase.endIndex - phrase.startIndex);
+        int endOfPhraseIndex = allWords.size() + phrase.size();
         for (Word word : phrase.words) {
-            tempArticle.addWord(word);
-            int wordIndex = tempArticle.wordCount() - 1;
-            addWord(wordIndex, article, endOfPhrase);
+            addWord(word, article, endOfPhraseIndex);
         }
 
         phrases.add(phrase);
     }
 
-    private void addWord(int wordIndex, Article article, int endOfPhraseIndex) {
+    private void addWord(Word word, Article article, int endOfPhraseIndex) {
+        int wordIndex = allWords.size();
+    	allWords.add(word);
+
         Node parent = null;
         Node lastParent = null;
-        Word word = tempArticle.wordAt(wordIndex);
 
         // An edge is added (if necessary) for all nodes found between the active one and the
         // last one. The active node is the first node which is not a leaf (a leaf node will never
@@ -51,19 +62,18 @@ public final class SuffixTree {
         while(true) {
             parent = activePoint.origin;
 
-            // If the node is explicit (already has edges) check if
-            // an edge labeled with the current word must be added.
+            // If the node is explicit, check if an edge for the current word must be added.
             if(activePoint.isExplicit()) {
                 if(parent.hasEdge(word)) {
-                    break; // Word already added to an edge.
+                    break; // Word's already added to an edge.
                 }
             }
             else if(activePoint.isImplicit()) {
                 // The edge must be split before the word can be added.
-                Edge edge = parent.edge(tempArticle.wordAt(activePoint.firstIndex));
+                Edge edge = parent.edge(allWords.get(activePoint.startIndex));
 
-                if(tempArticle.wordAt(edge.firstIndex + activePoint.span() + 1).equals(word)) {
-                    break; // Word already in the right place.
+                if(allWords.get(edge.startIndex + activePoint.span() + 1).equals(word)) {
+                    break; // Word's already in the right place.
                 }
 
                 parent = splitEdge(edge, activePoint, article);
@@ -71,7 +81,7 @@ public final class SuffixTree {
 
             // The edge not found, create one.
             Node newNode = new Node();
-            Edge newEdge = new Edge(article, tempArticle, wordIndex, endOfPhraseIndex - 1, parent, newNode);
+            Edge newEdge = new Edge(article, allWords, wordIndex, endOfPhraseIndex - 1, parent, newNode);
             parent.addEdge(word, newEdge);
 
             if((lastParent != null) && (lastParent != root)) {
@@ -79,15 +89,10 @@ public final class SuffixTree {
             }
             lastParent = parent;
 
-            // Find the next suffix.
-            if(activePoint.origin == root) {
-                // If the active node is the root of the tree the next suffix follows the natural order.
-                activePoint.firstIndex++;
-            }
-            else {
-                // For internal nodes a link is used.
-                activePoint.origin = activePoint.origin.suffixNode;
-            }
+            // If the active node is the root of the tree the next suffix follows the natural order.
+            if(activePoint.origin == root) activePoint.startIndex++;
+            // For internal nodes a link is used.
+            else activePoint.origin = activePoint.origin.suffixNode;
 
             // The suffix must be adjusted at each update.
             makeCanonic(activePoint);
@@ -99,11 +104,13 @@ public final class SuffixTree {
         }
 
         // The end point becomes the active point for the next step.
-        activePoint.lastIndex++;
+        activePoint.endIndex++;
         makeCanonic(activePoint);
     }
 
-    // Returns a set containing the base clusters with weight > minWeight.
+    /**
+     * Returns a set containing the base clusters with weight > minWeight.
+     */
     public Set<STCluster> baseClusters(double minWeight) {
         Set<STCluster> clusters =  new HashSet<STCluster>();
         Stack<Edge> edges = new Stack<Edge>();
@@ -123,34 +130,32 @@ public final class SuffixTree {
 
     private Node splitEdge(Edge edge, Suffix suffix, Article article) {
         Node newNode = new Node();
-        Edge newEdge = new Edge(article, tempArticle, edge.firstIndex, edge.firstIndex + suffix.span(), suffix.origin, newNode);
+        Edge newEdge = new Edge(article, allWords, edge.startIndex, edge.startIndex + suffix.span(), suffix.origin, newNode);
 
         // Replace the old edge with the new one.
-        suffix.origin.addEdge(tempArticle.wordAt(edge.firstIndex), newEdge);
+        suffix.origin.addEdge(allWords.get(edge.startIndex), newEdge);
         newNode.suffixNode = suffix.origin;
 
         // Adjust the new edge (the associated node remains a leaf).
-        edge.firstIndex = edge.firstIndex + suffix.span() + 1;
+        edge.startIndex = edge.startIndex + suffix.span() + 1;
         edge.parent = newNode;
-        newNode.addEdge(tempArticle.wordAt(edge.firstIndex), edge);
+        newNode.addEdge(allWords.get(edge.startIndex), edge);
         return newNode;
     }
 
     private void makeCanonic(Suffix suffix) {
-        if(suffix.isExplicit() || suffix.origin == null) {
-            return;
-        }
+        if(suffix.isExplicit() || suffix.origin == null) return;
 
-        Word word = tempArticle.wordAt(suffix.firstIndex);
+        Word word = allWords.get(suffix.startIndex);
         Edge edge = suffix.origin.edge(word);
 
         while(edge.span() <= suffix.span()) {
-            suffix.firstIndex = suffix.firstIndex + edge.span() + 1;
+            suffix.startIndex = suffix.startIndex + edge.span() + 1;
             suffix.origin = edge.child;
 
-            if(suffix.firstIndex <= suffix.lastIndex) {
+            if(suffix.startIndex <= suffix.endIndex) {
                 // Search can continue at the next level.
-                word = tempArticle.wordAt(suffix.firstIndex);
+                word = allWords.get(suffix.startIndex);
                 edge = suffix.origin.edge(word);
             }
         }
@@ -160,9 +165,9 @@ public final class SuffixTree {
         Phrase phrase = new Phrase();
 
         for(Edge edge : edges) {
-            for(int i = edge.firstIndex; i <= edge.lastIndex; i++) {
-                phrase.words.add(tempArticle.wordAt(i));
-            }
+        	for (Word word : allWords.subList(edge.startIndex, edge.endIndex + 1)){
+        		phrase.words.add(word);
+        	}
         }
 
         return phrase;
@@ -176,13 +181,12 @@ public final class SuffixTree {
             Node childNode = edge.child;
 
             if (childNode.isLeaf()) {
-                // Add the document to the cluster.
                 if (!cluster.articles.contains(edge.article)) {
                     cluster.articles.add(edge.article);
                 }
             }
             else {
-                // The edge leads to an internal node. All documents that belong to the cluster
+                // The edge leads to an internal node. All articles that belong to the cluster
             	// associated with this internal node must be added to the current cluster.
                 edges.push(edge);
                 STCluster child = getBaseClustersImpl(childNode, clusters, edges, minWeight);
@@ -196,9 +200,8 @@ public final class SuffixTree {
             }
         }
 
-        // The cluster is selected if it's weight is at least the minimum requested weight.
+        // The cluster is selected if it's weight is at least the minimum weight.
         if (cluster.computeWeight() > minWeight) clusters.add(cluster);
-
         return cluster;
     }
 }

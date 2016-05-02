@@ -108,26 +108,6 @@ public final class SuffixTree {
         makeCanonic(activePoint);
     }
 
-    /**
-     * Returns a set containing the base clusters with weight > minWeight.
-     */
-    public Set<STCluster> baseClusters(double minWeight) {
-        Set<STCluster> clusters =  new HashSet<STCluster>();
-        Stack<Edge> edges = new Stack<Edge>();
-
-        // Search the clusters on all edges from the root.
-        for (Edge edge : root.edges()){
-            edges.push(edge);
-
-            if(!edge.child.isLeaf())
-            	getBaseClustersImpl(edge.child, clusters, edges, minWeight);
-
-            edges.pop();
-        }
-
-        return clusters;
-    }
-
     private Node splitEdge(Edge edge, Suffix suffix, Article article) {
         Node newNode = new Node();
         Edge newEdge = new Edge(article, allWords, edge.startIndex, edge.startIndex + suffix.span(), suffix.origin, newNode);
@@ -173,7 +153,27 @@ public final class SuffixTree {
         return phrase;
     }
 
-    private STCluster getBaseClustersImpl(Node node, Set<STCluster> clusters, Stack<Edge> edges, double minWeight) {
+    /**
+     * Returns a set containing the base clusters with weight > minWeight.
+     */
+    public List<STCluster> baseClusters(double minWeight) {
+        Set<STCluster> clusters =  new HashSet<STCluster>();
+        Stack<Edge> edges = new Stack<Edge>();
+
+        // Search the clusters on all edges from the root.
+        for (Edge edge : root.edges()){
+            edges.push(edge);
+
+            if(!edge.child.isLeaf())
+            	baseClustersRecursive(edge.child, clusters, edges, minWeight);
+
+            edges.pop();
+        }
+
+        return new ArrayList<STCluster>(clusters);
+    }
+
+    private STCluster baseClustersRecursive(Node node, Set<STCluster> clusters, Stack<Edge> edges, double minWeight) {
         // Create a new cluster and set the associated phrase.
         STCluster cluster = new STCluster(makePhrase(edges));
 
@@ -189,7 +189,7 @@ public final class SuffixTree {
                 // The edge leads to an internal node. All articles that belong to the cluster
             	// associated with this internal node must be added to the current cluster.
                 edges.push(edge);
-                STCluster child = getBaseClustersImpl(childNode, clusters, edges, minWeight);
+                STCluster child = baseClustersRecursive(childNode, clusters, edges, minWeight);
                 edges.pop();
 
                 for (Article article : child.articles) {
@@ -201,7 +201,7 @@ public final class SuffixTree {
         }
 
         // The cluster is selected if it's weight is at least the minimum weight.
-        if (cluster.computeWeight() > minWeight) clusters.add(cluster);
+        if (cluster.weight() > minWeight) clusters.add(cluster);
         return cluster;
     }
 }

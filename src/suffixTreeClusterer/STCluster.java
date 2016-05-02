@@ -25,7 +25,7 @@ public final class STCluster implements Comparable<STCluster> {
 		phrases.add(phrase);
 	}
 
-	public double computeWeight() {
+	public double weight() {
 		// Cluster weight is the product of:
 		// - the number of articles
 		// - the length of sentences
@@ -70,6 +70,13 @@ public final class STCluster implements Comparable<STCluster> {
 		return merge(clusterSet);
 	}
 
+	public static STCluster merge(STCluster a, STCluster b) {
+		Set<STCluster> clusterSet = new HashSet<>();
+		clusterSet.add(a);
+		clusterSet.add(b);
+		return merge(clusterSet);
+	}
+
 	private double phrasesWeight() {
 		double sum = phrases.stream().mapToDouble(p -> p.words.size()).sum();
 		return sum < 2 ? 0.5 : Math.min(6, sum);
@@ -81,8 +88,8 @@ public final class STCluster implements Comparable<STCluster> {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder("Cluster: " + label);
-		sb.append("; Weight: " + weight);
-		sb.append("; Number docs: " + articles.size());
+		sb.append(", Weight: " + weight);
+		sb.append(", Number docs: " + articles.size());
 		for (Phrase p : phrases) sb.append(p.toString());
 		return sb.toString();
 	}

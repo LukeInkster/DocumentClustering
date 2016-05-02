@@ -14,38 +14,26 @@ import java.util.stream.Collectors;
 
 import kMeans.Cluster;
 import kMeans.CosineSimilarity;
+import kMeans.KMeans;
 import suffixTreeClusterer.STCluster;
-import suffixTreeClusterer.SuffixTreeClusterer;
+import suffixTreeClusterer.STKMeans;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 
-		List<Article> articles = new Parser(new File("data")).parse();
+		List<Article> articles = new Parser(new File("data")).parse().subList(0, 500);
 
 //		List<Article> articles = testArticles();
 
-		System.out.println("Finished reading " + articles.size() + " articles in "
-				+ (System.currentTimeMillis() - start) + "ms\n");
-		start = System.currentTimeMillis();
-
-		Map<String, Double> idf = idf(articles);
-
-		System.out.println("Finished calculating term frequencies in "
-				+ (System.currentTimeMillis() - start) + "ms\n");
-		start = System.currentTimeMillis();
-
-		for (Article a:articles){
-			a.tfidf(idf);
-		}
+		System.out.println("Finished reading " + articles.size() + " articles in "	+ (System.currentTimeMillis() - start) + "ms\n");
 
 		//SENTENCES OF FIRST ARTICLE
 		System.out.println(articles.get(0).phrases().stream().map(s -> s + "\n").collect(Collectors.toList()));
 		System.out.println(articles.get(0).body);
 
 		System.out.println(articles.size());
-		Set<STCluster> stClusters = SuffixTreeClusterer
-				.Cluster(articles, 135, .5);
+		List<STCluster> stClusters = STKMeans.cluster(articles, 135);
 
 		//SuffixTreeClusterer.articleSet.tree.root.print();
 		//System.out.println(SuffixTreeClusterer.articleSet.tree.root.edgeWords());
@@ -56,18 +44,13 @@ public class Main {
 			System.out.println("size: " + c.articles.size() + " purity: " + c.purity());
 		}
 		System.out.println("average purity: " + stClusters.stream().mapToDouble(x -> x.purity()).average().getAsDouble());
-		System.out.println("weighted average purity: " + weightedPurity(stClusters));
-
-
+		System.out.println("weighted average purity: " + stWeightedPurity(stClusters));
 
 		//System.out.println(idf.keySet().stream().map(x -> x + "\n").collect(Collectors.toList()));
 
 		//System.out.println(articles.get(0).bodyWords().stream().filter(x -> x.equals("cocoa")).count());
 		//System.out.println(articles.get(0).bodyWords().size());
 		//System.out.println(articles.stream().filter(x -> x.bodyWords().contains("cocoa")).count());
-
-		System.out.println("Finished calculating tfidf values in "
-				+ (System.currentTimeMillis() - start) + "ms");
 
 		//System.out.println(articles.get(0).tfidf.entrySet().stream().map(x -> x.getKey() + " : " + x.getValue()+ "\n").collect(Collectors.toList()));
 
@@ -100,12 +83,12 @@ public class Main {
 //		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(10).tfidf));
 
 		//KMEANS PURITIES
-//		List<Cluster> clusters = KMeans.cluster(articles, 120);
-//		for (Cluster c : clusters.stream().sorted((x,y) -> (int)((x.purity() - y.purity())*10000)).collect(Collectors.toList())){
-//			System.out.println("size: " + c.articles.size() + " purity: " + c.purity() + " topic:" + c.mostCommonTopic());
-//		}
-//		System.out.println("average purity: " + clusters.stream().mapToDouble(x -> x.purity()).average().getAsDouble());
-//		System.out.println("weighted average purity: " + weightedPurity(clusters));
+		List<Cluster> clusters = KMeans.cluster(articles, 120);
+		for (Cluster c : clusters.stream().sorted((x,y) -> (int)((x.purity() - y.purity())*10000)).collect(Collectors.toList())){
+			System.out.println("size: " + c.articles.size() + " purity: " + c.purity());
+		}
+		System.out.println("average purity: " + clusters.stream().mapToDouble(x -> x.purity()).average().getAsDouble());
+		System.out.println("weighted average purity: " + weightedPurity(clusters));
 	}
 
 	private static List<Article> testArticles() {
@@ -119,7 +102,7 @@ public class Main {
 		return new ArrayList<Article>(Arrays.asList(article1, article2, article3));
 	}
 
-	private static double weightedPurity(Set<STCluster> stClusters) {
+	private static double stWeightedPurity(List<STCluster> stClusters) {
 		return stClusters.stream().mapToDouble(x -> x.purity() * x.articles.size()).sum()
 				/ stClusters.stream().mapToInt(x -> x.articles.size()).sum();
 	}
@@ -127,23 +110,5 @@ public class Main {
 	private static double weightedPurity(List<Cluster> clusters){
 		return clusters.stream().mapToDouble(x -> x.purity() * x.articles.size()).sum()
 				/ clusters.stream().mapToInt(x -> x.articles.size()).sum();
-	}
-
-	private static Map<String, Double> idf(List<Article> articles) {
-		Map<String, Double> idf = new HashMap<String, Double>();
-
-		articles
-			.stream()
-			.map(a -> a.tf())
-			.forEach(tf -> {
-				tf.forEach((k, v) -> {
-					if (idf.containsKey(k)) idf.put(k, idf.get(k) + 1.0);
-					else idf.put(k, 1.0);
-				});
-			});
-
-		idf.forEach((k,v) -> idf.put(k, Math.log(((double)articles.size())/v)));
-
-		return idf;
 	}
 }

@@ -9,9 +9,11 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +37,7 @@ public class Parser {
 
 	public List<Article> parse()
 	{
-		return Arrays.stream(data.listFiles())
+		List<Article> articles = Arrays.stream(data.listFiles())
 			.filter(f -> f.getName().startsWith(dataPrefix))
 			.map(Parser::toBufferedReader)
 			.flatMap(this::splitFile)
@@ -43,6 +45,12 @@ public class Parser {
 			.filter(a -> !a.topics.isEmpty()) // So topics can be used to measure purity
 			.filter(a -> !a.bodyWords().isEmpty()) // Ignore empty articles
 			.collect(Collectors.toList());
+
+		Map<String, Double> idf = idf(articles);
+
+		for (Article a:articles) a.tfidf(idf);
+
+		return articles;
 	}
 
 	private Stream<String> splitFile(BufferedReader br) {
@@ -102,6 +110,24 @@ public class Parser {
 		int end = text.indexOf(endTag, start);
 		if (end < 0) throw new IllegalArgumentException("no end, tag=" + tag + " text=" + text);
 		return text.substring(start, end);
+	}
+
+	private static Map<String, Double> idf(List<Article> articles) {
+		Map<String, Double> idf = new HashMap<String, Double>();
+
+		articles
+			.stream()
+			.map(a -> a.tf())
+			.forEach(tf -> {
+				tf.forEach((k, v) -> {
+					if (idf.containsKey(k)) idf.put(k, idf.get(k) + 1.0);
+					else idf.put(k, 1.0);
+				});
+			});
+
+		idf.forEach((k,v) -> idf.put(k, Math.log(((double)articles.size())/v)));
+
+		return idf;
 	}
 
 	private static BufferedReader toBufferedReader(File f){

@@ -10,7 +10,7 @@ import main.Phrase;
 import main.Purity;
 
 public final class STCluster implements Comparable<STCluster> {
-	public List<Article> articles;
+    public List<Article> articles;
 	public List<Phrase> phrases;
 	public double weight;
 	String label;
@@ -38,7 +38,7 @@ public final class STCluster implements Comparable<STCluster> {
 	 * The similarity of two clusters is the proportion of each cluster's articles
 	 * which are also found in the other cluster
 	 */
-	public double similarity(STCluster other) {
+	public double similarityTo(STCluster other) {
 		Set<Article> articleSet = new HashSet<Article>(articles);
 
 		// Check which of the articles from the other cluster are found in this cluster.

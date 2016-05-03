@@ -9,13 +9,25 @@ import suffixTree.SuffixTree;
 public class STKMeans {
 	public static List<STCluster> cluster(List<Article> articles, int numSTClusters){
 		SuffixTree tree = new SuffixTree(articles);
-		List<STCluster> clusters = tree.baseClusters(0.1);
+		List<STCluster> clusters = tree.baseClusters(10);
+		System.out.println(clusters.size());
 
 		Random r = new Random();
-		while (clusters.size() > numSTClusters){
+		while (clusters.size() > numSTClusters) {
 			STCluster a = clusters.remove(r.nextInt(clusters.size()));
-			STCluster b = clusters.remove(r.nextInt(clusters.size()));
-			clusters.add(STCluster.merge(a, b));
+
+			double bestSimilarity = -1;
+			int bestSimilarityIndex = -1;
+			for (int i = 0; i < clusters.size(); i++) {
+				STCluster b = clusters.get(i);
+				if (a == b) continue;
+				double similarity = a.similarityTo(b);
+				if (similarity > bestSimilarity) {
+					bestSimilarityIndex = i;
+					bestSimilarity = similarity;
+				}
+			}
+			clusters.add(STCluster.merge(a, clusters.remove(bestSimilarityIndex)));
 		}
 
 		return clusters;

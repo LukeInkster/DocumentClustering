@@ -22,9 +22,9 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 
-		List<Article> articles = new Parser(new File("data")).parse().subList(0, 500);
+		//List<Article> articles = new Parser(new File("data")).parse().subList(0, 500);
 
-//		List<Article> articles = testArticles();
+		List<Article> articles = testArticles();
 
 		System.out.println("Finished reading " + articles.size() + " articles in "	+ (System.currentTimeMillis() - start) + "ms\n");
 
@@ -35,15 +35,12 @@ public class Main {
 		System.out.println(articles.size());
 		List<STCluster> stClusters = STKMeans.cluster(articles, 135);
 
-		//SuffixTreeClusterer.articleSet.tree.root.print();
-		//System.out.println(SuffixTreeClusterer.articleSet.tree.root.edgeWords());
 		for (STCluster c : stClusters
 				.stream()
 				.sorted((x,y) -> (int)((x.purity() - y.purity()) * 10000))
 				.collect(Collectors.toList())){
 			System.out.println("size: " + c.articles.size() + " purity: " + c.purity());
 		}
-		System.out.println("average purity: " + stClusters.stream().mapToDouble(x -> x.purity()).average().getAsDouble());
 		System.out.println("weighted average purity: " + stWeightedPurity(stClusters));
 
 		//System.out.println(idf.keySet().stream().map(x -> x + "\n").collect(Collectors.toList()));
@@ -65,14 +62,9 @@ public class Main {
 //						CosineSimilarity.of(articles.get(0).tfidf, y.tfidf)) * 1000000))
 //				.get().body);
 
-		System.out.println("Unique topics: " + articles.stream()
-			.flatMap(x -> x.topics.stream()).distinct().collect(Collectors.toList()).size());
-		System.out.println("Unique words: " + articles.stream()
-			.flatMap(x -> x.distinctWords().stream()).distinct().collect(Collectors.toList()).size());
-
-		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(0).tfidf));
-		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(1).tfidf));
-		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(2).tfidf));
+//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(0).tfidf));
+//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(1).tfidf));
+//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(2).tfidf));
 //		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(3).tfidf));
 //		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(4).tfidf));
 //		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(5).tfidf));
@@ -87,7 +79,6 @@ public class Main {
 		for (Cluster c : clusters.stream().sorted((x,y) -> (int)((x.purity() - y.purity())*10000)).collect(Collectors.toList())){
 			System.out.println("size: " + c.articles.size() + " purity: " + c.purity());
 		}
-		System.out.println("average purity: " + clusters.stream().mapToDouble(x -> x.purity()).average().getAsDouble());
 		System.out.println("weighted average purity: " + weightedPurity(clusters));
 	}
 
@@ -99,7 +90,9 @@ public class Main {
 		Article article1 = new Article("title1", "cat ate cheese", d, topics, e, e, e, e);
 		Article article2 = new Article("title2", "mouse ate cheese too", d, topics, e, e, e, e);
 		Article article3 = new Article("title3", "cat ate mouse too", d, topics, e, e, e, e);
-		return new ArrayList<Article>(Arrays.asList(article1, article2, article3));
+		List<Article> articles = new ArrayList<Article>(Arrays.asList(article1, article2, article3));
+		Parser.tfidfInit(articles);
+		return articles;
 	}
 
 	private static double stWeightedPurity(List<STCluster> stClusters) {

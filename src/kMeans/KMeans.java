@@ -8,6 +8,7 @@ import main.Article;
 
 public class KMeans {
 	public static List<Cluster> cluster(List<Article> articles, int numClusters){
+		numClusters = Math.min(numClusters, articles.size());
 		List<Cluster> clusters = new ArrayList<Cluster>(numClusters);
 		for (int i = 0; i < numClusters; i++){
 			clusters.add(new Cluster(articles.get((int)(Math.random() * articles.size()))));

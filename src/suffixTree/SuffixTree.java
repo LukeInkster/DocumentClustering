@@ -32,6 +32,8 @@ public final class SuffixTree {
 				addPhrase(phrase, article);
 			}
 		}
+
+		root.print();
     }
 
     public void addPhrase(Phrase phrase, Article article) {

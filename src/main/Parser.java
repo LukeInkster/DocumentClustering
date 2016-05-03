@@ -46,11 +46,15 @@ public class Parser {
 			.filter(a -> !a.bodyWords().isEmpty()) // Ignore empty articles
 			.collect(Collectors.toList());
 
+		tfidfInit(articles);
+
+		return articles;
+	}
+
+	public static void tfidfInit(List<Article> articles) {
 		Map<String, Double> idf = idf(articles);
 
 		for (Article a:articles) a.tfidf(idf);
-
-		return articles;
 	}
 
 	private Stream<String> splitFile(BufferedReader br) {

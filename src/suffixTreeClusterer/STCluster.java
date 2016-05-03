@@ -25,13 +25,20 @@ public final class STCluster implements Comparable<STCluster> {
 		phrases.add(phrase);
 	}
 
+	/**
+	 * Cluster weight is the product of:
+	 * - the number of articles
+	 * - the length of sentences
+	 * - the sum of the weight of each word's part of the sentences.
+	 */
 	public double weight() {
-		// Cluster weight is the product of:
-		// - the number of articles
-		// - the length of sentences
-		// - the sum of the weight of each word's part of the sentences.
 		double wordWeight = phrases.stream().mapToDouble(p -> p.weight()).sum();
 		return weight = articles.size() * phrasesWeight() * wordWeight;
+	}
+
+	private double phrasesWeight() {
+		double sum = phrases.stream().mapToDouble(p -> p.words.size()).sum();
+		return sum < 2 ? 0.5 : Math.min(6, sum);
 	}
 
 	/**
@@ -75,11 +82,6 @@ public final class STCluster implements Comparable<STCluster> {
 		clusterSet.add(a);
 		clusterSet.add(b);
 		return merge(clusterSet);
-	}
-
-	private double phrasesWeight() {
-		double sum = phrases.stream().mapToDouble(p -> p.words.size()).sum();
-		return sum < 2 ? 0.5 : Math.min(6, sum);
 	}
 
 	public int compareTo(STCluster other) {

@@ -9,14 +9,14 @@ import main.Article;
 import main.Phrase;
 import main.Purity;
 
-public final class STCluster implements Comparable<STCluster> {
-    public List<Article> articles;
+public final class STCluster {
+    public Set<Article> articles;
 	public List<Phrase> phrases;
 	public double weight;
 	String label;
 
 	public STCluster(int articleCapacity, int phraseCapacity) {
-		articles = new ArrayList<Article>(articleCapacity);
+		articles = new HashSet<Article>(articleCapacity);
 		phrases = new ArrayList<Phrase>(phraseCapacity);
 	}
 
@@ -42,20 +42,15 @@ public final class STCluster implements Comparable<STCluster> {
 	}
 
 	/**
-	 * The similarity of two clusters is the proportion of each cluster's articles
+	 * The similarity of two clusters is the average proportion of each cluster's articles
 	 * which are also found in the other cluster
 	 */
 	public double similarityTo(STCluster other) {
 		Set<Article> articleSet = new HashSet<Article>(articles);
+		double sharedArticles = other.articles.stream().filter(articleSet::contains).count();
 
-		// Check which of the articles from the other cluster are found in this cluster.
-		double common = other.articles.stream().filter(articleSet::contains).count();
-
-		double dist_forward = common / (double) articles.size();
-		double dist_backward = common / (double) other.articles.size();
-
-		// Return the average distance between these two clusters.
-		return (dist_forward + dist_backward) / 2.0 ;
+		return (sharedArticles / (double) articles.size()
+				+ sharedArticles / (double) other.articles.size()) / 2.0 ;
 	}
 
 	public static STCluster merge(Set<STCluster> clusters) {
@@ -82,10 +77,6 @@ public final class STCluster implements Comparable<STCluster> {
 		clusterSet.add(a);
 		clusterSet.add(b);
 		return merge(clusterSet);
-	}
-
-	public int compareTo(STCluster other) {
-		return other == this ? 0 : ((int) other.weight - (int) weight);
 	}
 
 	public String toString() {

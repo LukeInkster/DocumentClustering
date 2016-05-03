@@ -6,16 +6,24 @@ import java.util.Random;
 import main.Article;
 import suffixTree.SuffixTree;
 
-public class STKMeans {
+public class STClusterer {
 	public static List<STCluster> cluster(List<Article> articles, int numClusters){
 		numClusters = Math.min(numClusters, articles.size());
 		SuffixTree tree = new SuffixTree(articles);
 		double minWeight = 10;
 		List<STCluster> clusters = tree.baseClusters(minWeight);
-		while (clusters.size() < numClusters){
-			clusters = tree.baseClusters(minWeight /= 10.0);
+
+		// Ensure a manageable number of base clusters
+		while (clusters.size() < numClusters || clusters.size() > numClusters * 3){
+			if (clusters.size() < numClusters){
+				clusters = tree.baseClusters(minWeight /= 1.5);
+			}
+			else {
+				clusters = tree.baseClusters(minWeight *= 1.5);
+			}
 		}
 
+		System.out.println("merging clusters");
 		Random r = new Random();
 		while (clusters.size() > numClusters) {
 			STCluster a = clusters.remove(r.nextInt(clusters.size()));

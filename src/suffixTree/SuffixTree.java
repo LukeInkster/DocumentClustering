@@ -33,7 +33,7 @@ public final class SuffixTree {
 			}
 		}
 
-		root.print();
+		//root.print();
     }
 
     public void addPhrase(Phrase phrase, Article article) {

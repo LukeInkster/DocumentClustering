@@ -1,12 +1,12 @@
 package suffixTree;
 
 public final class Suffix {
-	public Node origin;
+	public Node node;
     public int startIndex;
     public int endIndex;
 
     public Suffix(Node origin, int startIndex, int endIndex) {
-        this.origin = origin;
+        this.node = origin;
         this.startIndex = startIndex;
         this.endIndex = endIndex;
     }

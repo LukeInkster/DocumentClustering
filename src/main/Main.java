@@ -15,10 +15,14 @@ import kMeans.KMeans;
 import suffixTreeClusterer.STCluster;
 import suffixTreeClusterer.STClusterer;
 
+/**
+ * Based off this article:
+ * http://dl.acm.org/citation.cfm?id=1242590
+ */
 public class Main {
-	public static boolean clean = false;
-	public static boolean printTree = true;
-	public static boolean useDemoData = true;
+	public static boolean clean = true;
+	public static boolean printTree = false;
+	public static boolean useDemoData = false;
 
 	private static int maxArticles = 1000;
 

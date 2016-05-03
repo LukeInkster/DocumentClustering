@@ -16,14 +16,22 @@ import suffixTreeClusterer.STCluster;
 import suffixTreeClusterer.STClusterer;
 
 public class Main {
+	public static boolean clean = false;
+	public static boolean printTree = true;
+	public static boolean useDemoData = true;
+
+	private static int maxArticles = 1000;
+
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 
-		List<Article> articles = realArticles();
-		//List<Article> articles = testArticles();
+		List<Article> articles = useDemoData ? testArticles() : realArticles();
 
-		System.out.println(articles.get(0).body);
-		System.out.println(articles.get(0).bodyWords());
+		if (useDemoData){
+			for (Article a : articles){
+				System.out.println(a.body);
+			}
+		}
 
 		System.out.println("Finished reading " + articles.size() + " articles in "	+ (System.currentTimeMillis() - start) + "ms\n");
 
@@ -55,7 +63,8 @@ public class Main {
 
 	private static List<Article> realArticles() {
 		File data = new File("data");
-		return new Parser(data).parse().subList(0, 1500);
+		List<Article> articles = new Parser(data).parse();
+		return articles.subList(0, Math.min(maxArticles, articles.size()));
 	}
 
 	private static List<Article> testArticles() {

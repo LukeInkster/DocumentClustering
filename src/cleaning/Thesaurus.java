@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import main.Main;
+
 public class Thesaurus {
 	public static Map<String, String> map = getWords();
 	public static Map<String, Double> idf;
@@ -56,7 +58,7 @@ public class Thesaurus {
 		return map;
 	}
 
-	public static Map<String, String> toMap(List<String> list){
+	private static Map<String, String> toMap(List<String> list){
 		if (list.size() < 2) return new HashMap<String, String>();
 		String first = list.get(0);
 		return list.subList(1, list.size())
@@ -65,19 +67,13 @@ public class Thesaurus {
 			.collect(Collectors.toMap(s -> s, s -> first));
 	}
 
-	public static BufferedReader toBufferedReader(File f){
+	private static BufferedReader toBufferedReader(File f){
 		try { return new BufferedReader(new FileReader(f)); }
 		catch (FileNotFoundException e) { throw new RuntimeException(e); }
 	}
 
-	public static Stream<String> mapAll(Stream<String> stream){
-		return stream.map(s -> {
-			String result = map.get(s);
-			return result == null ? s : result;
-		});
-	}
-
 	public static String map(String s){
+		if (Main.clean == false) return s;
 		String result = map.get(s);
 		return result == null ? s : result;
 	}

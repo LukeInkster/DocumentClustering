@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import main.Main;
+
 public class StopWords {
 	public static Set<String> words = getWords();
 
@@ -17,6 +19,7 @@ public class StopWords {
 	}
 
 	public static boolean isSafe(String s){
+		if (Main.clean == false) return true;
 		return !contains(s);
 	}
 

@@ -11,7 +11,7 @@ public class KMeans {
 		numClusters = Math.min(numClusters, articles.size());
 		List<Cluster> clusters = new ArrayList<Cluster>(numClusters);
 		for (int i = 0; i < numClusters; i++){
-			clusters.add(new Cluster(articles.get(i*3)));
+			clusters.add(new Cluster(articles.get(i)));
 		}
 
 		int numIterations = 5;

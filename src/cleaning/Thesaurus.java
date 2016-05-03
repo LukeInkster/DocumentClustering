@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 public class Thesaurus {
 	public static Map<String, String> map = getWords();
+	public static Map<String, Double> idf;
 
 	public static boolean containsKey(String s){
 		return map.containsKey(s);
@@ -41,8 +42,16 @@ public class Thesaurus {
 				);
 
 		entries.forEach(e -> {
-			if (!map.containsKey(e.getKey()))
+			if (!map.containsKey(e.getKey())){
 				map.put(e.getKey(), e.getValue());
+			}
+			else if (idf != null){
+				String existing = map.get(e.getKey());
+				if (idf.containsKey(existing) && idf.containsKey(e.getValue()) &&
+						idf.get(e.getValue()) < idf.get(existing)){
+					map.put(e.getKey(), e.getValue());
+				}
+			}
 		});
 		return map;
 	}

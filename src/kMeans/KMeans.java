@@ -11,10 +11,10 @@ public class KMeans {
 		numClusters = Math.min(numClusters, articles.size());
 		List<Cluster> clusters = new ArrayList<Cluster>(numClusters);
 		for (int i = 0; i < numClusters; i++){
-			clusters.add(new Cluster(articles.get((int)(Math.random() * articles.size()))));
+			clusters.add(new Cluster(articles.get(i*3)));
 		}
 
-		int numIterations = 15;
+		int numIterations = 5;
 		for (int i = 0; i < numIterations; i++){
 			long start = System.currentTimeMillis();
 			clusters = recalculateClusters(clusters, articles);

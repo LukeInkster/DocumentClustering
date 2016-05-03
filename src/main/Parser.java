@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import cleaning.Thesaurus;
+
 public class Parser {
 	private static final SimpleDateFormat dateFormat =
 			new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss.SS", Locale.US);
@@ -53,7 +55,7 @@ public class Parser {
 
 	public static void tfidfInit(List<Article> articles) {
 		Map<String, Double> idf = idf(articles);
-
+		Thesaurus.idf = idf;
 		for (Article a:articles) a.tfidf(idf);
 	}
 

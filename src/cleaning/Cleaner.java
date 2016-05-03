@@ -24,9 +24,9 @@ public class Cleaner {
 			)
 			.filter(Cleaner::isNotNumber)
 			.filter(Cleaner::isNotEmptyOrWhitespace)
-//			.map(Thesaurus::map)
-//			.map(Stemmer::stem)
-//			.filter(StopWords::isSafe)
+			.filter(StopWords::isSafe)
+			.map(Thesaurus::map)
+			.map(Stemmer::stem)
 			.collect(Collectors.toList());
 	}
 

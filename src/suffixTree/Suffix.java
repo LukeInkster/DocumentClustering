@@ -12,14 +12,14 @@ public final class Suffix {
     }
 
     /**
-     * @return True if the node represents an actual phrase end
+     * @return True if the suffix represents an actual phrase end
      */
     public boolean isExplicit() {
         return startIndex > endIndex;
     }
 
     /**
-     * @return True if the node is merely a location along an edge, rather than
+     * @return True if the suffix is just a location along an edge, rather than
      * representing an actual phrase end
      */
     public boolean isImplicit() {

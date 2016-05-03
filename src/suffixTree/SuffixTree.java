@@ -11,7 +11,6 @@ import main.Word;
 import suffixTreeClusterer.STCluster;
 
 public final class SuffixTree {
-
     public Node root;
 
     private Suffix activePoint;

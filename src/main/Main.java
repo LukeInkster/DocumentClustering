@@ -18,54 +18,19 @@ import suffixTreeClusterer.STClusterer;
 public class Main {
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
-		File data = new File("data");
 
-		List<Article> articles = new Parser(data).parse().subList(0, 5000);
-
+		List<Article> articles = realArticles();
 		//List<Article> articles = testArticles();
+
+		System.out.println(articles.get(0).body);
+		System.out.println(articles.get(0).bodyWords());
 
 		System.out.println("Finished reading " + articles.size() + " articles in "	+ (System.currentTimeMillis() - start) + "ms\n");
 
-		//SENTENCES OF FIRST ARTICLE
-//		System.out.println(articles.get(0).phrases().stream().map(s -> s + "\n").collect(Collectors.toList()));
-//		System.out.println(articles.get(0).body);
 		System.out.println("starting suffix tree");
 		suffixTree(articles);
 		System.out.println("starting kmeans");
 		kMeans(articles);
-
-		//System.out.println(idf.keySet().stream().map(x -> x + "\n").collect(Collectors.toList()));
-
-		//System.out.println(articles.get(0).bodyWords().stream().filter(x -> x.equals("cocoa")).count());
-		//System.out.println(articles.get(0).bodyWords().size());
-		//System.out.println(articles.stream().filter(x -> x.bodyWords().contains("cocoa")).count());
-
-		//System.out.println(articles.get(0).tfidf.entrySet().stream().map(x -> x.getKey() + " : " + x.getValue()+ "\n").collect(Collectors.toList()));
-
-		//System.out.println(Thesaurus.map.entrySet().stream().sorted((x,y) -> x.getValue().compareTo(y.getValue())).map(e -> e.getKey() + " -> " + e.getValue() + "\n").collect(Collectors.toList()));
-
-		// MOST SIMILAR TO FIRST ARTICLE
-//		System.out.println(articles
-//				.subList(1, articles.size())
-//				.stream()
-//				.max((x,y) -> (int)(
-//						(CosineSimilarity.of(articles.get(0).tfidf, x.tfidf) -
-//						CosineSimilarity.of(articles.get(0).tfidf, y.tfidf)) * 1000000))
-//				.get().body);
-
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(0).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(1).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(2).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(3).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(4).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(5).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(6).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(7).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(8).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(9).tfidf));
-//		System.out.println(CosineSimilarity.of(articles.get(0).tfidf, articles.get(10).tfidf));
-
-		//KMEANS PURITIES
 	}
 
 	private static void kMeans(List<Article> articles) {
@@ -86,6 +51,11 @@ public class Main {
 			System.out.println("size: " + c.articles.size() + " purity: " + c.purity());
 		}
 		System.out.println("weighted average purity: " + stWeightedPurity(stClusters));
+	}
+
+	private static List<Article> realArticles() {
+		File data = new File("data");
+		return new Parser(data).parse().subList(0, 1500);
 	}
 
 	private static List<Article> testArticles() {

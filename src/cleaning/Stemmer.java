@@ -396,6 +396,10 @@ public class Stemmer
          {  System.out.println("error reading " + args[i]);
             break;
          }
+         finally {
+        	 try {in.close();}
+        	 catch (IOException e) {}
+         }
       }
       catch (FileNotFoundException e)
       {  System.out.println("file " + args[i] + " not found");

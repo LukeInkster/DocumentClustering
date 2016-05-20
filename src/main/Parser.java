@@ -45,18 +45,21 @@ public class Parser {
 			.flatMap(this::splitFile)
 			.map(this::parseArticle)
 			.filter(a -> !a.topics.isEmpty()) // So topics can be used to measure purity
-			.filter(a -> !a.bodyWords().isEmpty()) // Ignore empty articles
+			.filter(a -> !a.body.isEmpty()) // Ignore empty articles
 			.collect(Collectors.toList());
 
-		tfidfInit(articles);
+		thesaurusInit(articles);
+		for (Article a:articles) a.bodyWords();
+		Map<String, Double> idf = idf(articles);
+		for (Article a:articles) a.tfidf(idf);
 
 		return articles;
 	}
 
-	public static void tfidfInit(List<Article> articles) {
-		Map<String, Double> idf = idf(articles);
-		Thesaurus.idf = idf;
-		for (Article a:articles) a.tfidf(idf);
+	public static void thesaurusInit(List<Article> articles) {
+		Map<String, Double> idf = earlyIdf(articles);
+		Thesaurus.setIdf(idf);
+//		for (Article a:articles) a.tfidf(idf);
 	}
 
 	private Stream<String> splitFile(BufferedReader br) {
@@ -116,6 +119,24 @@ public class Parser {
 		int end = text.indexOf(endTag, start);
 		if (end < 0) throw new IllegalArgumentException("no end, tag=" + tag + " text=" + text);
 		return text.substring(start, end);
+	}
+
+	private static Map<String, Double> earlyIdf(List<Article> articles) {
+		Map<String, Double> idf = new HashMap<String, Double>();
+
+		articles
+			.stream()
+			.map(a -> Arrays.stream(a.body.split("\\s+")))
+			.forEach(tf -> {
+				tf.forEach(s -> {
+					if (idf.containsKey(s)) idf.put(s, idf.get(s) + 1.0);
+					else idf.put(s, 1.0);
+				});
+			});
+
+		idf.forEach((k,v) -> idf.put(k, Math.log(((double)articles.size())/v)));
+
+		return idf;
 	}
 
 	private static Map<String, Double> idf(List<Article> articles) {

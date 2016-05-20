@@ -4,33 +4,34 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import cleaning.Thesaurus;
 import kMeans.Cluster;
 import kMeans.KMeans;
 import suffixTreeClusterer.STCluster;
 import suffixTreeClusterer.STClusterer;
 
 /**
- * Based off this article:
- * http://dl.acm.org/citation.cfm?id=1242590
+ * Based off this article: http://dl.acm.org/citation.cfm?id=1242590
  */
 public class Main {
 	public static boolean clean = true;
 	public static boolean printTree = false;
 	public static boolean useDemoData = false;
 
-	private static int maxArticles = 1000;
+	private static int maxArticles = 100000;
 
 	public static void main(String[] args) throws IOException {
 		long start = System.currentTimeMillis();
 
 		List<Article> articles = useDemoData ? testArticles() : realArticles();
-
+		System.out.println(articles.stream().flatMap(a -> a.bodyWords().stream()).distinct().count());
 		if (useDemoData){
 			for (Article a : articles){
 				System.out.println(a.body);
@@ -46,8 +47,9 @@ public class Main {
 	}
 
 	private static void kMeans(List<Article> articles) {
-		List<Cluster> clusters = KMeans.cluster(articles, 120);
-		for (Cluster c : clusters.stream().sorted((x,y) -> (int)((x.purity() - y.purity())*10000)).collect(Collectors.toList())){
+		List<Cluster> clusters = KMeans.cluster(articles, 30);
+		for (Cluster c : clusters.stream().sorted((x, y) -> (int) ((x.purity() - y.purity()) * 10000))
+				.collect(Collectors.toList())) {
 			System.out.println("size: " + c.articles.size() + " purity: " + c.purity());
 		}
 		System.out.println("weighted average purity: " + weightedPurity(clusters));
@@ -56,10 +58,8 @@ public class Main {
 	private static void suffixTree(List<Article> articles) {
 		List<STCluster> stClusters = STClusterer.cluster(articles, 135);
 
-		for (STCluster c : stClusters
-				.stream()
-				.sorted((x,y) -> (int)((x.purity() - y.purity()) * 10000))
-				.collect(Collectors.toList())){
+		for (STCluster c : stClusters.stream().sorted((x, y) -> (int) ((x.purity() - y.purity()) * 10000))
+				.collect(Collectors.toList())) {
 			System.out.println("size: " + c.articles.size() + " purity: " + c.purity());
 		}
 		System.out.println("weighted average purity: " + stWeightedPurity(stClusters));
@@ -68,7 +68,11 @@ public class Main {
 	private static List<Article> realArticles() {
 		File data = new File("data");
 		List<Article> articles = new Parser(data).parse();
-		return articles.subList(0, Math.min(maxArticles, articles.size()));
+		if (articles.size() > maxArticles){
+			Collections.shuffle(articles);
+			return articles.subList(0, maxArticles);
+		}
+		return articles;
 	}
 
 	private static List<Article> testArticles() {
@@ -81,7 +85,6 @@ public class Main {
 		Article article2 = new Article("title2", "mouse ate cheese too", d, topics2, e, e, e, e);
 		Article article3 = new Article("title3", "cat ate mouse too", d, topics3, e, e, e, e);
 		List<Article> articles = new ArrayList<Article>(Arrays.asList(article1, article2, article3));
-		Parser.tfidfInit(articles);
 		return articles;
 	}
 
@@ -90,7 +93,7 @@ public class Main {
 				/ stClusters.stream().mapToInt(x -> x.articles.size()).sum();
 	}
 
-	private static double weightedPurity(List<Cluster> clusters){
+	private static double weightedPurity(List<Cluster> clusters) {
 		return clusters.stream().mapToDouble(x -> x.purity() * x.articles.size()).sum()
 				/ clusters.stream().mapToInt(x -> x.articles.size()).sum();
 	}

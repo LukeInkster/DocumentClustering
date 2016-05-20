@@ -14,11 +14,19 @@ import java.util.stream.Stream;
 import main.Main;
 
 public class Thesaurus {
-	public static Map<String, String> map = getWords();
-	public static Map<String, Double> idf;
+	public static Map<String, String> map;
+	private static Map<String, Double> df = new HashMap<String, Double>();
+	private static final boolean stemming = false;
 
 	public static boolean containsKey(String s){
 		return map.containsKey(s);
+	}
+
+	public static void setIdf(Map<String, Double> idf){
+		for (Map.Entry<String, Double> e : idf.entrySet()){
+			df.put(stem(e.getKey()), 1.0/e.getValue());
+		}
+		map = getWords();
 	}
 
 	private static Map<String, String> getWords() {
@@ -43,28 +51,37 @@ public class Thesaurus {
 					.stream()
 				);
 
-		entries.forEach(e -> {
-			if (!map.containsKey(e.getKey())){
-				map.put(e.getKey(), e.getValue());
+		for (Map.Entry<String, String> e : entries.collect(Collectors.toList())){
+			Double keyDf = df(e.getKey());
+			Double valueDf = df(e.getValue());
+			if (keyDf > valueDf) {
+				// if the key is more common than the value, leave the key
 			}
-			else if (idf != null){
-				String existing = map.get(e.getKey());
-				if (idf.containsKey(existing) && idf.containsKey(e.getValue()) &&
-						idf.get(e.getValue()) < idf.get(existing)){
-					map.put(e.getKey(), e.getValue());
+			else if (!map.containsKey(e.getKey())){
+				// if the value is more common than the key, and we aren't already mapping
+				// the key to something, then map the key to the value
+				map.put(stem(e.getKey()), stem(e.getValue()));
+			}
+			else {
+				Double existingDf = df(map.get(e.getKey()));
+				if (valueDf > existingDf){
+					// if the value is more common than the key, and the value is more common
+					// than the existing value for this key, then update that mapping
+					map.put(stem(e.getKey()), stem(e.getValue()));
 				}
 			}
-		});
+		}
 		return map;
 	}
 
 	private static Map<String, String> toMap(List<String> list){
 		if (list.size() < 2) return new HashMap<String, String>();
-		String first = list.get(0);
-		return list.subList(1, list.size())
-			.stream()
-			.distinct()
-			.collect(Collectors.toMap(s -> s, s -> first));
+		String first = stem(list.get(0));
+		Map<String, String> result = new HashMap<String, String>();
+		for (String s : list.subList(1, list.size())){
+			result.put(stem(s), first);
+		}
+		return result;
 	}
 
 	private static BufferedReader toBufferedReader(File f){
@@ -72,10 +89,19 @@ public class Thesaurus {
 		catch (FileNotFoundException e) { throw new RuntimeException(e); }
 	}
 
+	private static double df(String s){
+		Double d = df.get(s);
+		return d == null ? 0.0 : d;
+	}
+
 	public static String map(String s){
 		if (Main.clean == false) return s;
 		String result = map.get(s);
 		return result == null ? s : result;
+	}
+
+	private static String stem(String s) {
+		return stemming ? Stemmer.stem(s) : s;
 	}
 
 }
